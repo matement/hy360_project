@@ -54,9 +54,9 @@ DROP TABLE IF EXISTS `Child` ;
 
 CREATE TABLE IF NOT EXISTS `Child` (
   `age` INT NULL,
-  `name` VARCHAR(45) NULL,
+  `name` VARCHAR(45) NOT NULL,
   `Employee_idEmployee` INT NOT NULL,
-  PRIMARY KEY (`Employee_idEmployee`),
+  PRIMARY KEY (`Employee_idEmployee`, `name`),
   CONSTRAINT `fk_Child_Employee1`
     FOREIGN KEY (`Employee_idEmployee`)
     REFERENCES `Employee` (`idEmployee`)
