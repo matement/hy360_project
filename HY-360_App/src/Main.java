@@ -21,6 +21,6 @@ public class Main {
         Date today = new Date(System.currentTimeMillis());
 
         // Test hiring ID 101
-        manager.hirePermanentEmployee(101, "Test User", "Test Address", "GR123", "69999", false, "Test Bank", "Computer Science", today, 0);
+        manager.hirePermanentTeaching(101, "Test User", "Test Address", "GR123", "69999", false, "Test Bank", "Computer Science", today, 0);
     }
 }
