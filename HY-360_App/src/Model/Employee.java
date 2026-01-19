@@ -12,11 +12,12 @@ public class Employee {
     private Date employmentDate;
     private String departmentName;
     private boolean isActive;
+    private String role;
 
     public Employee() {}
 
     public Employee(int id, String name, String address, String iban, String phoneNumber,
-                    boolean isMarried, String bank, Date employmentDate, String departmentName, boolean isActive) {
+                    boolean isMarried, String bank, Date employmentDate, String departmentName, boolean isActive, String role) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -27,6 +28,7 @@ public class Employee {
         this.employmentDate = employmentDate;
         this.departmentName = departmentName;
         this.isActive = isActive;
+        this.role = role;
     }
 
     public int getId() {
@@ -107,5 +109,13 @@ public class Employee {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

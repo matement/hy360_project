@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS `Employee` (
   `name` VARCHAR(45) NULL,
   `Deparment_Department_name` VARCHAR(45) NOT NULL,
   `Is_Active` TINYINT NOT NULL DEFAULT 1,
+  `Role` VARCHAR(40) NOT NULL DEFAULT 'UNKNOWN',
   PRIMARY KEY (`idEmployee`),
   INDEX `fk_Employee_Deparment1_idx` (`Deparment_Department_name` ASC) VISIBLE,
   CONSTRAINT `fk_Employee_Deparment1`

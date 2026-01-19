@@ -283,4 +283,10 @@ public class EmployeeManager {
             try { if (ps != null) ps.close(); } catch (SQLException e) {}
         }
     }
+
+    public void ExecutePayroll() {
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+    }
 }
