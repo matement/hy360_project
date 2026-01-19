@@ -11,11 +11,12 @@ public class Employee {
     private String bank;
     private Date employmentDate;
     private String departmentName;
+    private boolean isActive;
 
     public Employee() {}
 
     public Employee(int id, String name, String address, String iban, String phoneNumber,
-                    boolean isMarried, String bank, Date employmentDate, String departmentName) {
+                    boolean isMarried, String bank, Date employmentDate, String departmentName, boolean isActive) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -25,6 +26,7 @@ public class Employee {
         this.bank = bank;
         this.employmentDate = employmentDate;
         this.departmentName = departmentName;
+        this.isActive = isActive;
     }
 
     public int getId() {
@@ -97,5 +99,13 @@ public class Employee {
 
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

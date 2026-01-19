@@ -10,6 +10,8 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema mydb
 -- -----------------------------------------------------
+CREATE DATABASE IF NOT EXISTS `university_payroll`;
+USE `university_payroll`;
 
 -- -----------------------------------------------------
 -- Table `Department`
@@ -37,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `Employee` (
   `employment_starting_date` DATE NULL,
   `name` VARCHAR(45) NULL,
   `Deparment_Department_name` VARCHAR(45) NOT NULL,
+  `Is_Active` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`idEmployee`),
   INDEX `fk_Employee_Deparment1_idx` (`Deparment_Department_name` ASC) VISIBLE,
   CONSTRAINT `fk_Employee_Deparment1`
@@ -202,6 +205,16 @@ CREATE TABLE IF NOT EXISTS `Payment` (
     REFERENCES `Employee` (`idEmployee`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+DROP TABLE IF EXISTS `SalaryRates`;
+
+CREATE TABLE IF NOT EXISTS `SalaryRates` (
+  `role_name` VARCHAR(45) NOT NULL,
+  `base_salary` DECIMAL(10,2) NOT NULL, 
+  PRIMARY KEY (`role_name`)             
+)
 ENGINE = InnoDB;
 
 

@@ -22,7 +22,6 @@ public class EmployeeManager {
         String sqlPermanent = "INSERT INTO Permanent (Employee_idEmployee, Years_of_employment) VALUES (?, ?)";
 
         // 3. Permanent Teaching Table (Leaf Layer)
-        // NOTE: Check your SQL! If you fixed the typo 'Permenant' to 'Permanent' in your DB, update it here too.
         String sqlTeaching = "INSERT INTO `Permanent Teaching Employee` (`Permenant_Employee_idEmployee`, `research_allowence`) VALUES (?, ?)";
 
         try {
@@ -256,34 +255,32 @@ public class EmployeeManager {
 
     public void fireEmployee(int id) {
         Connection conn = null;
-        // We must try to delete from ALL leaf tables because we might not know which specific type they are
-        String[] queries = {
-                "DELETE FROM `Permanent Teaching Employee` WHERE Permenant_Employee_idEmployee = ?",
-                "DELETE FROM `Permanent Administrative Employee` WHERE Permenant_Employee_idEmployee = ?",
-                "DELETE FROM `Contractor Teaching Employee` WHERE Contractor_Employee_idEmployee = ?",
-                "DELETE FROM `Contractor Administrative Employee` WHERE Contractor_Employee_idEmployee = ?",
-                "DELETE FROM Permanent WHERE Employee_idEmployee = ?",
-                "DELETE FROM Contractor WHERE Employee_idEmployee = ?",
-                "DELETE FROM Employee WHERE idEmployee = ?"
-        };
+        PreparedStatement ps = null;
+
+        String sql = "UPDATE Employee SET Is_Active = 0 WHERE idEmployee = ?";
 
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            for (String sql : queries) {
-                try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setInt(1, id);
-                    ps.executeUpdate();
-                }
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, id);
+
+            int rows = ps.executeUpdate();
+
+            if(rows > 0) {
+                System.out.println("Success: Employee " + id + " is now inactive (fired).");
+            } else {
+                System.out.println("Error: Employee not found.");
             }
 
             conn.commit();
-            System.out.println("Success: Employee " + id + " fired (deleted).");
 
         } catch (SQLException e) {
-            try { if (conn != null) conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) {}
             e.printStackTrace();
+        } finally {
+            try { if (ps != null) ps.close(); } catch (SQLException e) {}
         }
     }
 }
