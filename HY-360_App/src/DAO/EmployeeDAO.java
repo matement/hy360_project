@@ -29,7 +29,7 @@ public class EmployeeDAO {
                 emp.setMarried(rs.getBoolean("is_Married"));
                 emp.setBank(rs.getString("bank"));
                 emp.setEmploymentDate(rs.getDate("employment_starting_date"));
-                emp.setDepartmentName(rs.getString("Department_name"));
+                emp.setDepartmentName(rs.getString("Department_Department_name"));
                 emp.setActive(rs.getBoolean("is_Active"));
                 emp.setRole(rs.getString("Role"));
             }
@@ -58,7 +58,7 @@ public class EmployeeDAO {
                         rs.getBoolean("is_Married"),
                         rs.getString("bank"),
                         rs.getDate("employment_starting_date"),
-                        rs.getString("Department_name"),
+                        rs.getString("Department_Department_name"),
                         rs.getBoolean("is_Active"),
                         rs.getString("Role")
                 );

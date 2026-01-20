@@ -27,6 +27,11 @@ public class SalaryRateDAO {
     }
 
     public void UpdateBaseSalary(String roleName, double newSalary) {
+        double currentSalary = getBaseSalary(roleName);
+        if (newSalary < currentSalary) {
+            System.out.println("ΠΡΟΣΟΧΗ: Η μείωση μισθού απαγορεύεται από τον κανονισμό!");
+            return;
+        }
         String sql = "UPDATE SalaryRates SET base_salary = ? WHERE role_name = ?";
 
         try (Connection conn = DBConnection.getConnection();

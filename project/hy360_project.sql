@@ -38,13 +38,13 @@ CREATE TABLE IF NOT EXISTS `Employee` (
   `bank` VARCHAR(45) NULL,
   `employment_starting_date` DATE NULL,
   `name` VARCHAR(45) NULL,
-  `Deparment_Department_name` VARCHAR(45) NOT NULL,
+  `Department_Department_name` VARCHAR(45) NOT NULL,
   `Is_Active` TINYINT NOT NULL DEFAULT 1,
   `Role` VARCHAR(40) NOT NULL DEFAULT 'UNKNOWN',
   PRIMARY KEY (`idEmployee`),
-  INDEX `fk_Employee_Deparment1_idx` (`Deparment_Department_name` ASC) VISIBLE,
+  INDEX `fk_Employee_Deparment1_idx` (`Department_Department_name` ASC) VISIBLE,
   CONSTRAINT `fk_Employee_Deparment1`
-    FOREIGN KEY (`Deparment_Department_name`)
+    FOREIGN KEY (`Department_Department_name`)
     REFERENCES `Department` (`department_name`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
@@ -218,6 +218,39 @@ CREATE TABLE IF NOT EXISTS `SalaryRates` (
 )
 ENGINE = InnoDB;
 
+-- -----------------------------
+-- ------ Views (Bonus) --------
+-- -----------------------------
+CREATE OR REPLACE VIEW View_Full_Employee_Details AS
+SELECT 
+    e.idEmployee, e.name, e.role, e.Department_Department_name,
+    p.Years_of_employment, 
+    c.salary as contractor_salary
+FROM Employee e
+LEFT JOIN Permanent p ON e.idEmployee = p.Employee_idEmployee
+LEFT JOIN Contractor cnt ON e.idEmployee = cnt.Employee_idEmployee
+LEFT JOIN Contract c ON cnt.Employee_idEmployee = c.Contractor_Employee_idEmployee;
+
+CREATE OR REPLACE VIEW View_Department_Payroll AS
+    SELECT 
+        e.Department_Department_name,
+        SUM(p.amount) AS total_cost,
+        COUNT(p.idPayment) AS employees_paid
+    FROM
+        Payment p
+            JOIN
+        Employee e ON p.Employee_idEmployee = e.idEmployee
+    GROUP BY e.Department_Department_name;
+
+CREATE OR REPLACE VIEW View_Expiring_Contracts AS
+SELECT 
+    e.idEmployee, e.name, e.Department_Department_name, 
+    c.end_Date, c.salary
+FROM Employee e
+JOIN Contractor cnt ON e.idEmployee = cnt.Employee_idEmployee
+JOIN Contract c ON cnt.Employee_idEmployee = c.Contractor_Employee_idEmployee
+WHERE c.end_Date > CURDATE()
+ORDER BY c.end_Date ASC;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
