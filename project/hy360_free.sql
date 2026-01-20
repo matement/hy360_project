@@ -1,0 +1,13 @@
+USE university_payroll;
+SET SQL_SAFE_UPDATES = 0;
+DELETE FROM `Payment`;
+DELETE FROM `Contract`;
+DELETE FROM `Child`;
+DELETE FROM `Contractor Teaching Employee`;
+DELETE FROM `Contractor Administrative Employee`;
+DELETE FROM `Permanent Teaching Employee`;
+DELETE FROM `Permanent Administrative Employee`;
+DELETE FROM `Permanent`;
+DELETE FROM `Contractor`;
+DELETE FROM `Employee`;
+SET SQL_SAFE_UPDATES = 1;
