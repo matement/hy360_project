@@ -12,7 +12,6 @@ import java.util.List;
 
 public class PayrollManager {
 
-
     public void runMonthlyPayroll(int month, int year) {
         EmployeeDAO employeeDAO = new EmployeeDAO();
         SalaryService salaryService = new SalaryService();

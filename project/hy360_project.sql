@@ -14,7 +14,7 @@ CREATE DATABASE IF NOT EXISTS `university_payroll`;
 USE `university_payroll`;
 
 -- -----------------------------------------------------
--- Table `Department`
+-- 1. Table `Department`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `Department` ;
 
@@ -23,9 +23,20 @@ CREATE TABLE IF NOT EXISTS `Department` (
   PRIMARY KEY (`department_name`))
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- 2. Table `SalaryRates` (ΠΡΕΠΕΙ ΝΑ ΔΗΜΙΟΥΡΓΗΘΕΙ ΠΡΙΝ ΤΟ EMPLOYEE)
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `SalaryRates`;
+
+CREATE TABLE IF NOT EXISTS `SalaryRates` (
+  `role_name` VARCHAR(45) NOT NULL,
+  `base_salary` DECIMAL(10,2) NOT NULL, 
+  PRIMARY KEY (`role_name`)             
+)
+ENGINE = InnoDB;
 
 -- -----------------------------------------------------
--- Table `Employee`
+-- 3. Table `Employee` (Με 2 Foreign Keys τώρα)
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `Employee` ;
 
@@ -40,22 +51,32 @@ CREATE TABLE IF NOT EXISTS `Employee` (
   `name` VARCHAR(45) NULL,
   `Department_Department_name` VARCHAR(45) NOT NULL,
   `Is_Active` TINYINT NOT NULL DEFAULT 1,
-  `Role` VARCHAR(40) NOT NULL DEFAULT 'UNKNOWN',
+  `Role` VARCHAR(45) NOT NULL, -- Αφαιρέσαμε το default 'UNKNOWN' για να αναγκάσουμε σωστή εγγραφή
   PRIMARY KEY (`idEmployee`),
-  INDEX `fk_Employee_Deparment1_idx` (`Department_Department_name` ASC) VISIBLE,
-  CONSTRAINT `fk_Employee_Deparment1`
+  
+  -- Foreign Key 1: Department
+  INDEX `fk_Employee_Department_idx` (`Department_Department_name` ASC) VISIBLE,
+  CONSTRAINT `fk_Employee_Department`
     FOREIGN KEY (`Department_Department_name`)
     REFERENCES `Department` (`department_name`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+
+  -- Foreign Key 2: Role (Σύνδεση με SalaryRates)
+  INDEX `fk_Employee_Role_idx` (`Role` ASC) VISIBLE,
+  CONSTRAINT `fk_Employee_Role`
+    FOREIGN KEY (`Role`)
+    REFERENCES `SalaryRates` (`role_name`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
+-- Οι υπόλοιποι πίνακες (παραμένουν ίδιοι)
+-- -----------------------------------------------------
+
 -- Table `Child`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Child` ;
-
 CREATE TABLE IF NOT EXISTS `Child` (
   `age` INT NULL,
   `name` VARCHAR(45) NOT NULL,
@@ -68,12 +89,8 @@ CREATE TABLE IF NOT EXISTS `Child` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
 -- Table `Permanent`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Permanent` ;
-
 CREATE TABLE IF NOT EXISTS `Permanent` (
   `Years_of_employment` INT NULL,
   `Employee_idEmployee` INT NOT NULL,
@@ -85,12 +102,8 @@ CREATE TABLE IF NOT EXISTS `Permanent` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
 -- Table `Contractor`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Contractor` ;
-
 CREATE TABLE IF NOT EXISTS `Contractor` (
   `Employee_idEmployee` INT NOT NULL,
   PRIMARY KEY (`Employee_idEmployee`),
@@ -101,12 +114,8 @@ CREATE TABLE IF NOT EXISTS `Contractor` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
 -- Table `Contract`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Contract` ;
-
 CREATE TABLE IF NOT EXISTS `Contract` (
   `idContract` INT NOT NULL,
   `start_Date` DATE NULL,
@@ -122,12 +131,8 @@ CREATE TABLE IF NOT EXISTS `Contract` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
 -- Table `Permanent Teaching Employee`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Permanent Teaching Employee` ;
-
 CREATE TABLE IF NOT EXISTS `Permanent Teaching Employee` (
   `research_allowence` DECIMAL(10,2) NULL,
   `Permenant_Employee_idEmployee` INT NOT NULL,
@@ -139,12 +144,8 @@ CREATE TABLE IF NOT EXISTS `Permanent Teaching Employee` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
 -- Table `Permanent Administrative Employee`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Permanent Administrative Employee` ;
-
 CREATE TABLE IF NOT EXISTS `Permanent Administrative Employee` (
   `Permenant_Employee_idEmployee` INT NOT NULL,
   PRIMARY KEY (`Permenant_Employee_idEmployee`),
@@ -155,12 +156,8 @@ CREATE TABLE IF NOT EXISTS `Permanent Administrative Employee` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
 -- Table `Contractor Teaching Employee`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Contractor Teaching Employee` ;
-
 CREATE TABLE IF NOT EXISTS `Contractor Teaching Employee` (
   `library_allowence` DECIMAL(10,2) NULL,
   `Contractor_Employee_idEmployee` INT NOT NULL,
@@ -172,12 +169,8 @@ CREATE TABLE IF NOT EXISTS `Contractor Teaching Employee` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
 -- Table `Contractor Administrative Employee`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Contractor Administrative Employee` ;
-
 CREATE TABLE IF NOT EXISTS `Contractor Administrative Employee` (
   `Contractor_Employee_idEmployee` INT NOT NULL,
   PRIMARY KEY (`Contractor_Employee_idEmployee`),
@@ -188,12 +181,8 @@ CREATE TABLE IF NOT EXISTS `Contractor Administrative Employee` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
 -- Table `Payment`
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `Payment` ;
-
 CREATE TABLE IF NOT EXISTS `Payment` (
   `idPayment` INT NOT NULL,
   `date` DATE NULL,
@@ -208,22 +197,12 @@ CREATE TABLE IF NOT EXISTS `Payment` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
-DROP TABLE IF EXISTS `SalaryRates`;
-
-CREATE TABLE IF NOT EXISTS `SalaryRates` (
-  `role_name` VARCHAR(45) NOT NULL,
-  `base_salary` DECIMAL(10,2) NOT NULL, 
-  PRIMARY KEY (`role_name`)             
-)
-ENGINE = InnoDB;
-
 -- -----------------------------
 -- ------ Views (Bonus) --------
 -- -----------------------------
 CREATE OR REPLACE VIEW View_Full_Employee_Details AS
 SELECT 
-    e.idEmployee, e.name, e.role, e.Department_Department_name,
+    e.idEmployee, e.name, e.Role, e.Department_Department_name,
     p.Years_of_employment, 
     c.salary as contractor_salary
 FROM Employee e
