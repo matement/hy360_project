@@ -18,7 +18,7 @@ public class SalaryService {
 
         Employee emp = employeeDAO.getEmployeeById(employeeId);
         if (emp == null || !emp.isActive()) {
-            System.out.println("Employee not found or inactive.");
+            System.out.println("Employee " + employeeId + " not found or inactive.");
             return 0;
         }
 
@@ -29,48 +29,54 @@ public class SalaryService {
         LocalDate today = LocalDate.now();
         int yearsOfService = Period.between(startDate, today).getYears();
 
-        String role = emp.getRole();
+        String role = emp.getRole();             // π.χ. "TEACHING"
+        String type = emp.getEmploymentType();   // π.χ. "PERMANENT"
 
-        if (role.startsWith("PERMANENT")) {
+        // 1. Υπολογισμός Βασικού Μισθού
+        if ("PERMANENT".equals(type)) {
+            // Οι μόνιμοι παίρνουν μισθό βάσει του Ρόλου τους (TEACHING ή ADMINISTRATIVE)
             baseAmount = salaryRateDAO.getBaseSalary(role);
 
             if (yearsOfService > 1) {
-                double experienceBonus = baseAmount * 0.15 * (yearsOfService - 1); // Αφαιρούμε τον 1ο χρόνο
+                double experienceBonus = baseAmount * 0.15 * (yearsOfService - 1);
                 finalSalary += experienceBonus;
             }
             finalSalary += baseAmount;
 
-        } else if (role.startsWith("CONTRACTOR")) {
+        } else if ("CONTRACTOR".equals(type)) {
+            // Οι συμβασιούχοι παίρνουν μισθό από τη Σύμβαση
             baseAmount = contractDAO.getSalaryByEmployeeId(employeeId);
             finalSalary += baseAmount;
         }
 
+        // 2. Οικογενειακό Επίδομα
         if (emp.isMarried()) {
             finalSalary += (baseAmount * 0.05);
         }
-        int childCount = employeeDAO.getChildCount(employeeId); // Νέα μέθοδος που πρέπει να φτιάξεις
+        int childCount = employeeDAO.getChildCount(employeeId);
         if (childCount > 0) {
             finalSalary += (baseAmount * 0.05 * childCount);
         }
 
-
-        if (role.equals("PERMANENT_TEACHING")) {
-            double researchAllowance = employeeDAO.getResearchAllowance(employeeId); // Νέα μέθοδος
-            finalSalary += researchAllowance;
-        }
-        else if (role.equals("CONTRACTOR_TEACHING")) {
-            double libraryAllowance = employeeDAO.getLibraryAllowance(employeeId); // Νέα μέθοδος
-            finalSalary += libraryAllowance;
+        // 3. Ειδικά Επιδόματα (Ελέγχουμε τον Ρόλο και τον Τύπο)
+        if ("TEACHING".equals(role)) {
+            if ("PERMANENT".equals(type)) {
+                // Επίδομα Έρευνας
+                finalSalary += employeeDAO.getResearchAllowance(employeeId);
+            } else if ("CONTRACTOR".equals(type)) {
+                // Επίδομα Βιβλιοθήκης
+                finalSalary += employeeDAO.getLibraryAllowance(employeeId);
+            }
         }
 
         savePayment(employeeId, finalSalary);
-
-        System.out.println("Salary calculated & paid for ID " + employeeId + ": " + finalSalary + "€");
+        System.out.println("Salary calculated & paid for ID " + employeeId + " (" + type + " " + role + "): " + finalSalary + "€");
         return finalSalary;
     }
 
     private void savePayment(int empId, double amount) {
-        String sql = "INSERT INTO Payment (date, amount, Employee_idEmployee, idPayment) VALUES (?, ?, ?, ?)";
+        // Χωρίς idPayment αν είναι AUTO_INCREMENT, αλλιώς όπως το είχες
+        String sql = "INSERT INTO Payment (date, amount, Employee_idEmployee) VALUES (?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -78,11 +84,7 @@ public class SalaryService {
             ps.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
             ps.setDouble(2, amount);
             ps.setInt(3, empId);
-            ps.setInt(4, (int)(System.currentTimeMillis() % 100000)); // Πρόχειρο ID generator για τώρα
-
             ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 }
