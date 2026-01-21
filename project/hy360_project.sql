@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `Contract` (
 ENGINE = InnoDB;
 
 -- Table `Permanent Teaching Employee`
-DROP TABLE IF EXISTS `Permanent Teaching Employee` ;
+DROP TABLE IF EXISTS `Permanent_Teaching_Employee` ;
 CREATE TABLE IF NOT EXISTS `Permanent Teaching Employee` (
   `research_allowence` DECIMAL(10,2) NULL,
   `Permenant_Employee_idEmployee` INT NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `Permanent Teaching Employee` (
 ENGINE = InnoDB;
 
 -- Table `Permanent Administrative Employee`
-DROP TABLE IF EXISTS `Permanent Administrative Employee` ;
+DROP TABLE IF EXISTS `Permanent_Administrative_Employee` ;
 CREATE TABLE IF NOT EXISTS `Permanent Administrative Employee` (
   `Permenant_Employee_idEmployee` INT NOT NULL,
   PRIMARY KEY (`Permenant_Employee_idEmployee`),
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS `Permanent Administrative Employee` (
 ENGINE = InnoDB;
 
 -- Table `Contractor Teaching Employee`
-DROP TABLE IF EXISTS `Contractor Teaching Employee` ;
+DROP TABLE IF EXISTS `Contractor_Teaching_Employee` ;
 CREATE TABLE IF NOT EXISTS `Contractor Teaching Employee` (
   `library_allowence` DECIMAL(10,2) NULL,
   `Contractor_Employee_idEmployee` INT NOT NULL,
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `Contractor Teaching Employee` (
 ENGINE = InnoDB;
 
 -- Table `Contractor Administrative Employee`
-DROP TABLE IF EXISTS `Contractor Administrative Employee` ;
+DROP TABLE IF EXISTS `Contractor_Administrative_Employee` ;
 CREATE TABLE IF NOT EXISTS `Contractor Administrative Employee` (
   `Contractor_Employee_idEmployee` INT NOT NULL,
   PRIMARY KEY (`Contractor_Employee_idEmployee`),
