@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS `Employee` (
   `Role_roleID` INT NOT NULL,
   `Employment_type_typeID` INT NOT NULL,
   `Department_departmentID` INT NOT NULL,
+  `Is_Active` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`idEmployee`),
   INDEX `fk_Employee_Role1_idx` (`Role_roleID` ASC) VISIBLE,
   INDEX `fk_Employee_Employment_type1_idx` (`Employment_type_typeID` ASC) VISIBLE,
@@ -94,9 +95,9 @@ DROP TABLE IF EXISTS `Child` ;
 
 CREATE TABLE IF NOT EXISTS `Child` (
   `age` INT NULL,
-  `name` VARCHAR(45) NULL,
+  `name` VARCHAR(45) NOT NULL,
   `Employee_idEmployee` INT NOT NULL,
-  PRIMARY KEY (`Employee_idEmployee, name`),
+  PRIMARY KEY (`Employee_idEmployee`, `name`),
   CONSTRAINT `fk_Child_Employee1`
     FOREIGN KEY (`Employee_idEmployee`)
     REFERENCES `Employee` (`idEmployee`)
@@ -132,7 +133,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `Payment` ;
 
 CREATE TABLE IF NOT EXISTS `Payment` (
-  `idPayment` INT NOT NULL,
+  `idPayment` INT NOT NULL AUTO_INCREMENT,
   `date` DATE NULL,
   `amount` DECIMAL(10,2) NOT NULL,
   `Employee_idEmployee` INT NOT NULL,
@@ -188,6 +189,52 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
+-- -----------------------------
+-- ------ Views (Bonus) --------
+-- -----------------------------
+
+-- View 1: Full details (Joins Employee with Role, Dept, Type, Allowance, Contract)
+CREATE OR REPLACE VIEW View_Full_Employee_Details AS
+SELECT 
+    e.idEmployee, 
+    e.name, 
+    r.role_name, 
+    d.department_name,
+    et.type_name as employment_type,
+    c.salary as contract_salary,
+    a.research_allowence,
+    a.library_allowence
+FROM Employee e
+JOIN Role r ON e.Role_roleID = r.roleID
+JOIN Department d ON e.Department_departmentID = d.departmentID
+JOIN Employment_type et ON e.Employment_type_typeID = et.typeID
+LEFT JOIN Contract c ON e.idEmployee = c.Employee_idEmployee
+LEFT JOIN Allowences a ON e.idEmployee = a.Employee_idEmployee;
+
+-- View 2: Payroll Stats per Department
+CREATE OR REPLACE VIEW View_Department_Payroll AS
+SELECT 
+    d.department_name,
+    SUM(p.amount) AS total_cost,
+    COUNT(p.idPayment) AS employees_paid
+FROM Payment p
+JOIN Employee e ON p.Employee_idEmployee = e.idEmployee
+JOIN Department d ON e.Department_departmentID = d.departmentID
+GROUP BY d.department_name;
+
+-- View 3: Expiring Contracts (For Contractors)
+CREATE OR REPLACE VIEW View_Expiring_Contracts AS
+SELECT 
+    e.idEmployee, 
+    e.name, 
+    d.department_name, 
+    c.end_Date, 
+    c.salary
+FROM Employee e
+JOIN Department d ON e.Department_departmentID = d.departmentID
+JOIN Contract c ON e.idEmployee = c.Employee_idEmployee
+WHERE c.end_Date > CURDATE()
+ORDER BY c.end_Date ASC;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

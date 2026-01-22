@@ -78,7 +78,7 @@ public class Main {
 
         // Αύξηση Βασικού Μισθού (Update SalaryRates)
         SalaryRateDAO salaryDAO = new SalaryRateDAO();
-        salaryDAO.UpdateBaseSalary("PERMANENT_TEACHING", 1500.00);
+        salaryDAO.UpdateBaseSalary("TEACHING", 1500.00);
 
         // Αύξηση Ειδικού Επιδόματος Έρευνας
         manager.updateResearchAllowance(101, 350.0);
