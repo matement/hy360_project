@@ -10,7 +10,7 @@ public class MainFrame extends JFrame {
     private JPanel contentPanel;
 
     public MainFrame() {
-        setTitle("HY-360 – Payroll System");
+        setTitle("HY-360 – Project");
         setSize(1000, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
