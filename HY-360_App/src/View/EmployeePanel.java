@@ -34,7 +34,6 @@ public class EmployeePanel extends JPanel {
             "Οικ. Κατάσταση",
             "Παιδιά",
             "Ηλικίες Παιδιών",
-            "Τύπος",
             "Κατηγορία",
             "Τμήμα",
             "Ημ. Έναρξης",
@@ -59,7 +58,6 @@ public class EmployeePanel extends JPanel {
             "Έγγαμος",
             2,
             "5, 8",
-            "Μόνιμος",
             "Διοικητικός",
             "Πληροφορική",
             "2026-09-01",
@@ -114,7 +112,6 @@ public class EmployeePanel extends JPanel {
                     dialog.getMaritalStatus(),
                     dialog.getNumChildren(),
                     dialog.getChildrenAges(),
-                    dialog.getEType(),
                     dialog.getCategory(),
                     dialog.getDepartment(),
                     dialog.getStartDate(),
@@ -145,8 +142,7 @@ public class EmployeePanel extends JPanel {
                 (String) model.getValueAt(row, 8),
                 (String) model.getValueAt(row, 9),
                 (String) model.getValueAt(row, 10),
-                (String) model.getValueAt(row, 11),
-                (String) model.getValueAt(row, 12));
+                (String) model.getValueAt(row, 11));
 
         dialog.setVisible(true);
         if (dialog.isConfirmed()) {
@@ -154,14 +150,13 @@ public class EmployeePanel extends JPanel {
             model.setValueAt(dialog.getMaritalStatus(), row, 2);
             model.setValueAt(dialog.getNumChildren(), row, 3);
             model.setValueAt(dialog.getChildrenAges(), row, 4);
-            model.setValueAt(dialog.getEType(), row, 5);
-            model.setValueAt(dialog.getCategory(), row, 6);
-            model.setValueAt(dialog.getDepartment(), row, 7);
-            model.setValueAt(dialog.getStartDate(), row, 8);
-            model.setValueAt(dialog.getAddress(), row, 9);
-            model.setValueAt(dialog.getPhone(), row, 10);
-            model.setValueAt(dialog.getBankName(), row, 11);
-            model.setValueAt(dialog.getIban(), row, 12);
+            model.setValueAt(dialog.getCategory(), row, 5);
+            model.setValueAt(dialog.getDepartment(), row, 6);
+            model.setValueAt(dialog.getStartDate(), row, 7);
+            model.setValueAt(dialog.getAddress(), row, 8);
+            model.setValueAt(dialog.getPhone(), row, 9);
+            model.setValueAt(dialog.getBankName(), row, 10);
+            model.setValueAt(dialog.getIban(), row, 11);
         }
     }
 
@@ -187,8 +182,7 @@ public class EmployeePanel extends JPanel {
                 (String) model.getValueAt(row, 8),
                 (String) model.getValueAt(row, 9),
                 (String) model.getValueAt(row, 10),
-                (String) model.getValueAt(row, 11),
-                (String) model.getValueAt(row, 12));
+                (String) model.getValueAt(row, 11));
 
     dialog.setVisible(true);
     }
@@ -217,17 +211,11 @@ public class EmployeePanel extends JPanel {
 
         if (confirm == JOptionPane.YES_OPTION) {
             // Αλλάζουμε την κατάσταση στον πίνακα σε "Απολυμένος"
-            model.setValueAt("Απολυμένος", row, 13); // η στήλη 13 είναι η "Κατάσταση"
+            model.setValueAt("Απολυμένος", row, 12); // η στήλη 13 είναι η "Κατάσταση"
 
             JOptionPane.showMessageDialog(this,
                     "Ο υπάλληλος απολύθηκε. Η μισθοδοσία για το μήνα καταβλήθηκε.");
         }
-    }
-
-    private void onRetire() {
-        if (!isRowSelected()) return;
-        JOptionPane.showMessageDialog(this,
-            "Συνταξιοδότηση (τελευταία μέρα μήνα)");
     }
 
     private boolean isRowSelected() {

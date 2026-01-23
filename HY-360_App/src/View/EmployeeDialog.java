@@ -13,7 +13,6 @@ public class EmployeeDialog extends JDialog {
     private JSpinner childrenSpinner;
     private JTextField childrenAgesField;
 
-    private JComboBox<String> typeEBox;
     private JComboBox<String> categoryBox;
 
     private JTextField departmentField;
@@ -52,7 +51,6 @@ public class EmployeeDialog extends JDialog {
         childrenSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));
         childrenAgesField = new JTextField();
 
-        typeEBox = new JComboBox<>(new String[] { "Μόνιμος", "Συμβασιούχος" });
         categoryBox = new JComboBox<>(new String[] { "Διοικητικός", "Διδακτικός" });
 
         departmentField = new JTextField();
@@ -72,9 +70,6 @@ public class EmployeeDialog extends JDialog {
         panel.add(childrenSpinner);
         panel.add(new JLabel("Ηλικίες Παιδιών:"));
         panel.add(childrenAgesField);
-
-        panel.add(new JLabel("Τύπος Υπαλλήλου:"));
-        panel.add(typeEBox);
         panel.add(new JLabel("Κατηγορία:"));
         panel.add(categoryBox);
 
@@ -169,10 +164,6 @@ public class EmployeeDialog extends JDialog {
         return childrenAgesField.getText();
     }
 
-    public String getEType() {
-        return (String) typeEBox.getSelectedItem();
-    }
-
     public String getCategory() {
         return (String) categoryBox.getSelectedItem();
     }
@@ -206,7 +197,6 @@ public class EmployeeDialog extends JDialog {
             String marital,
             int children,
             String ages,
-            String type,
             String category,
             String department,
             String startDate,
@@ -219,7 +209,6 @@ public class EmployeeDialog extends JDialog {
         childrenSpinner.setValue(children);
         childrenAgesField.setText(ages);
 
-        typeEBox.setSelectedItem(type);
         categoryBox.setSelectedItem(category);
 
         departmentField.setText(department);
@@ -235,7 +224,6 @@ public class EmployeeDialog extends JDialog {
         maritalBox.setEnabled(false);
         childrenSpinner.setEnabled(false);
         childrenAgesField.setEditable(false);
-        typeEBox.setEnabled(false);
         categoryBox.setEnabled(false);
         departmentField.setEditable(false);
         startDateField.setEditable(false);
