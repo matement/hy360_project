@@ -7,116 +7,237 @@ import java.awt.*;
 public class EmployeePanel extends JPanel {
 
     private JTable table;
-    private DefaultTableModel tableModel;
+    private DefaultTableModel model;
 
     public EmployeePanel() {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(10,10));
+        setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
         add(createTitle(), BorderLayout.NORTH);
-        add(createTablePanel(), BorderLayout.CENTER);
-        add(createButtonPanel(), BorderLayout.SOUTH);
+        add(createTable(), BorderLayout.CENTER);
+        add(createButtons(), BorderLayout.SOUTH);
     }
 
+    // ================= TITLE =================
     private JLabel createTitle() {
         JLabel label = new JLabel("Διαχείριση Υπαλλήλων", SwingConstants.CENTER);
         label.setFont(label.getFont().deriveFont(Font.BOLD, 22f));
-        label.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
         return label;
     }
 
-    private JScrollPane createTablePanel() {
+    // ================= TABLE =================
+    private JScrollPane createTable() {
+
         String[] columns = {
-            "ID","Όνομα","Οικ. Κατ.","Παιδιά","Ηλικίες Παιδιών","Κατηγορία","Τμήμα",
-            "Ημερ. Έναρξης","Διεύθυνση","Τηλέφωνο","Τράπεζα","Αρ. Λογαριασμού"
+            "ID",
+            "Όνομα",
+            "Οικ. Κατάσταση",
+            "Παιδιά",
+            "Ηλικίες Παιδιών",
+            "Τύπος",
+            "Κατηγορία",
+            "Τμήμα",
+            "Ημ. Έναρξης",
+            "Διεύθυνση",
+            "Τηλέφωνο",
+            "Τράπεζα",
+            "Αρ. Λογαριασμού",
+            "Κατάσταση"
         };
 
-        Object[][] data = {
-            {1,"Γιώργος Παπαδόπουλος","Έγγαμος",2,"5,8","Μόνιμος Διοικητικός","Πληροφορική",
-             "01/09/2018","Ηρ. Πολυτεχνείου 10","6971234567","Alpha Bank","1234567890"}
-        };
-
-        tableModel = new DefaultTableModel(data, columns) {
+        model = new DefaultTableModel(columns, 0) {
             @Override
-            public boolean isCellEditable(int row, int col) { return false; }
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
 
-        table = new JTable(tableModel);
-        table.setFillsViewportHeight(true);
+        // ΕΝΔΕΙΚΤΙΚΑ ΔΕΔΟΜΕΝΑ
+        model.addRow(new Object[]{
+            1,
+            "Γιώργος Παπαδόπουλος",
+            "Έγγαμος",
+            2,
+            "5, 8",
+            "Μόνιμος",
+            "Διοικητικός",
+            "Πληροφορική",
+            "2026-09-01",
+            "Ηρ. Πολυτεχνείου 10",
+            "6971234567",
+            "Alpha Bank",
+            "GR16011012500000000123",
+            "Ενεργός"
+        });
+
+        table = new JTable(model);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         return new JScrollPane(table);
     }
 
-    private JPanel createButtonPanel() {
+    // ================= BUTTONS =================
+    private JPanel createButtons() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER,15,10));
 
-        JButton addBtn = new JButton("Add");
-        JButton editBtn = new JButton("Edit");
-        JButton deleteBtn = new JButton("Delete");
+        JButton addBtn = new JButton("Πρόσληψη");
+        JButton editBtn = new JButton("Επεξεργασία");
+        JButton fireBtn = new JButton("Απόλυση/Συνταξιοδότηση");
+        JButton viewBtn = new JButton("Προβολή");
 
-        addBtn.addActionListener(e -> {
-            EmployeeDialog dialog = new EmployeeDialog((JFrame) SwingUtilities.getWindowAncestor(this),"Add Employee");
-            dialog.setVisible(true);
-            if(dialog.isConfirmed()) {
-                Object[] row = {
-                    tableModel.getRowCount()+1,
+        addBtn.addActionListener(e -> onAdd());
+        editBtn.addActionListener(e -> onEdit());
+        fireBtn.addActionListener(e -> onFire());
+        viewBtn.addActionListener(e -> onView());
+
+        panel.add(addBtn);
+        panel.add(editBtn);
+        panel.add(viewBtn);
+        panel.add(fireBtn);
+
+
+        return panel;
+    }
+
+    // ================= ACTIONS =================
+    private void onAdd() {
+        EmployeeDialog dialog = new EmployeeDialog((JFrame) SwingUtilities.getWindowAncestor(this),
+                "Πρόσληψη Υπαλλήλου",false);
+
+        dialog.setVisible(true);
+
+        if (dialog.isConfirmed()) {
+            model.addRow(new Object[] {
+                    model.getRowCount() + 1,
                     dialog.getNameValue(),
                     dialog.getMaritalStatus(),
                     dialog.getNumChildren(),
                     dialog.getChildrenAges(),
+                    dialog.getEType(),
                     dialog.getCategory(),
                     dialog.getDepartment(),
                     dialog.getStartDate(),
                     dialog.getAddress(),
                     dialog.getPhone(),
                     dialog.getBankName(),
-                    dialog.getBankAccount()
-                };
-                tableModel.addRow(row);
-            }
-        });
+                    dialog.getIban(),
+                    "Ενεργός"
+            });
+        }
 
-        editBtn.addActionListener(e -> {
-            int selected = table.getSelectedRow();
-            if(selected==-1) { JOptionPane.showMessageDialog(this,"Επίλεξε υπάλληλο για επεξεργασία!"); return; }
+    }
 
-            EmployeeDialog dialog = new EmployeeDialog((JFrame) SwingUtilities.getWindowAncestor(this),"Edit Employee");
-            dialog.setFields(
-                (String)tableModel.getValueAt(selected,1),
-                (String)tableModel.getValueAt(selected,2),
-                (Integer)tableModel.getValueAt(selected,3),
-                (String)tableModel.getValueAt(selected,4),
-                (String)tableModel.getValueAt(selected,5),
-                (String)tableModel.getValueAt(selected,6),
-                (String)tableModel.getValueAt(selected,7),
-                (String)tableModel.getValueAt(selected,8),
-                (String)tableModel.getValueAt(selected,9),
-                (String)tableModel.getValueAt(selected,10),
-                (String)tableModel.getValueAt(selected,11)
-            );
-            dialog.setVisible(true);
-            if(dialog.isConfirmed()) {
-                tableModel.setValueAt(dialog.getNameValue(),selected,1);
-                tableModel.setValueAt(dialog.getMaritalStatus(),selected,2);
-                tableModel.setValueAt(dialog.getNumChildren(),selected,3);
-                tableModel.setValueAt(dialog.getChildrenAges(),selected,4);
-                tableModel.setValueAt(dialog.getCategory(),selected,5);
-                tableModel.setValueAt(dialog.getDepartment(),selected,6);
-                tableModel.setValueAt(dialog.getStartDate(),selected,7);
-                tableModel.setValueAt(dialog.getAddress(),selected,8);
-                tableModel.setValueAt(dialog.getPhone(),selected,9);
-                tableModel.setValueAt(dialog.getBankName(),selected,10);
-                tableModel.setValueAt(dialog.getBankAccount(),selected,11);
-            }
-        });
+    private void onEdit() {
+        if (!isRowSelected())return;
 
-        deleteBtn.addActionListener(e -> {
-            int selected = table.getSelectedRow();
-            if(selected==-1) { JOptionPane.showMessageDialog(this,"Επίλεξε υπάλληλο για διαγραφή!"); return; }
-            tableModel.removeRow(selected);
-        });
+        int row = table.getSelectedRow();
 
-        panel.add(addBtn);
-        panel.add(editBtn);
-        panel.add(deleteBtn);
+        EmployeeDialog dialog = new EmployeeDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Επεξεργασία",false);
+        dialog.setFields(
+                (String) model.getValueAt(row, 1),
+                (String) model.getValueAt(row, 2),
+                (int) model.getValueAt(row, 3),
+                (String) model.getValueAt(row, 4),
+                (String) model.getValueAt(row, 5),
+                (String) model.getValueAt(row, 6),
+                (String) model.getValueAt(row, 7),
+                (String) model.getValueAt(row, 8),
+                (String) model.getValueAt(row, 9),
+                (String) model.getValueAt(row, 10),
+                (String) model.getValueAt(row, 11),
+                (String) model.getValueAt(row, 12));
 
-        return panel;
+        dialog.setVisible(true);
+        if (dialog.isConfirmed()) {
+            model.setValueAt(dialog.getNameValue(), row, 1);
+            model.setValueAt(dialog.getMaritalStatus(), row, 2);
+            model.setValueAt(dialog.getNumChildren(), row, 3);
+            model.setValueAt(dialog.getChildrenAges(), row, 4);
+            model.setValueAt(dialog.getEType(), row, 5);
+            model.setValueAt(dialog.getCategory(), row, 6);
+            model.setValueAt(dialog.getDepartment(), row, 7);
+            model.setValueAt(dialog.getStartDate(), row, 8);
+            model.setValueAt(dialog.getAddress(), row, 9);
+            model.setValueAt(dialog.getPhone(), row, 10);
+            model.setValueAt(dialog.getBankName(), row, 11);
+            model.setValueAt(dialog.getIban(), row, 12);
+        }
+    }
+
+    private void onView() {
+        if (!isRowSelected())return;
+
+        int row = table.getSelectedRow();
+
+        EmployeeDialog dialog = new EmployeeDialog(
+                (JFrame) SwingUtilities.getWindowAncestor(this),
+                "Προβολή",
+                true // <-- readOnly = true
+        );
+
+        dialog.setFields(
+                (String) model.getValueAt(row, 1),
+                (String) model.getValueAt(row, 2),
+                (int) model.getValueAt(row, 3),
+                (String) model.getValueAt(row, 4),
+                (String) model.getValueAt(row, 5),
+                (String) model.getValueAt(row, 6),
+                (String) model.getValueAt(row, 7),
+                (String) model.getValueAt(row, 8),
+                (String) model.getValueAt(row, 9),
+                (String) model.getValueAt(row, 10),
+                (String) model.getValueAt(row, 11),
+                (String) model.getValueAt(row, 12));
+
+    dialog.setVisible(true);
+    }
+
+    private void onFire() {
+        if (!isRowSelected())return;
+        int row = table.getSelectedRow();
+
+        // Έλεγχος αν είναι η τελευταία μέρα του μήνα
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+        if (!today.equals(lastDayOfMonth)) {
+            JOptionPane.showMessageDialog(this,
+                    "Η απόλυση μπορεί να γίνει μόνο την τελευταία μέρα του μήνα",
+                    "Προειδοποίηση",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Επιβεβαίωση από τον χρήστη
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Είσαι σίγουρος για την απόλυση του υπαλλήλου;",
+                "Επιβεβαίωση Απόλυσης",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Αλλάζουμε την κατάσταση στον πίνακα σε "Απολυμένος"
+            model.setValueAt("Απολυμένος", row, 13); // η στήλη 13 είναι η "Κατάσταση"
+
+            JOptionPane.showMessageDialog(this,
+                    "Ο υπάλληλος απολύθηκε. Η μισθοδοσία για το μήνα καταβλήθηκε.");
+        }
+    }
+
+    private void onRetire() {
+        if (!isRowSelected()) return;
+        JOptionPane.showMessageDialog(this,
+            "Συνταξιοδότηση (τελευταία μέρα μήνα)");
+    }
+
+    private boolean isRowSelected() {
+        if (table.getSelectedRow() == -1) {
+            JOptionPane.showMessageDialog(this,
+                "Παρακαλώ επίλεξε υπάλληλο",
+                "Σφάλμα",
+                JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        return true;
     }
 }

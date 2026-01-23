@@ -1,7 +1,6 @@
 package View;
 
 import javax.swing.*;
-
 import java.awt.*;
 
 public class MainFrame extends JFrame {
@@ -10,49 +9,44 @@ public class MainFrame extends JFrame {
     private JPanel contentPanel;
 
     public MainFrame() {
-        setTitle("HY-360 – Project");
-        setSize(1000, 600);
+        setTitle("HY-360 Μισθοδοσία Πανεπιστημίου Κρήτης");
+        setSize(1100, 650);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
 
-        add(createSidebar(), BorderLayout.WEST);
-        add(createContentPanel(), BorderLayout.CENTER);
-    }
-
-    private JPanel createSidebar() {
-        JPanel sidebar = new JPanel(new GridLayout(4, 1, 0, 10));
-        sidebar.setPreferredSize(new Dimension(180, 0));
-        sidebar.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
-
-        JButton empBtn = new JButton("Υπάλληλοι");
-        JButton conBtn = new JButton("Συμβάσεις");
-        JButton payBtn = new JButton("Μισθοδοσία");
-        JButton repBtn = new JButton("Αναφορές");
-
-        empBtn.addActionListener(e -> cardLayout.show(contentPanel, "EMP"));
-        conBtn.addActionListener(e -> cardLayout.show(contentPanel, "CON"));
-        payBtn.addActionListener(e -> cardLayout.show(contentPanel, "PAY"));
-        repBtn.addActionListener(e -> cardLayout.show(contentPanel, "REP"));
-
-        sidebar.add(empBtn);
-        sidebar.add(conBtn);
-        sidebar.add(payBtn);
-        sidebar.add(repBtn);
-
-        return sidebar;
-    }
-
-    private JPanel createContentPanel() {
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
 
-        contentPanel.add(new EmployeePanel(), "EMP");
-        contentPanel.add(new ContractPanel(), "CON");
-        contentPanel.add(new PayrollPanel(), "PAY");
-        contentPanel.add(new ReportsPanel(), "REP");
+        // Panels
+        contentPanel.add(new EmployeePanel(), "EMPLOYEES");
+        contentPanel.add(new ContractPanel(), "CONTRACTS");
+        contentPanel.add(new PayrollPanel(), "PAYROLL");
+        contentPanel.add(new ReportsPanel(), "REPORTS");
 
-        cardLayout.show(contentPanel, "EMP"); // start with Employees panel
-        return contentPanel;
+        add(createMenu(), BorderLayout.NORTH);
+        add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private JMenuBar createMenu() {
+        JMenuBar bar = new JMenuBar();
+
+        JButton empBtn = new JButton("Υπάλληλοι");
+        empBtn.addActionListener(e -> cardLayout.show(contentPanel, "EMPLOYEES"));
+
+        JButton conBtn = new JButton("Συμβάσεις");
+        conBtn.addActionListener(e -> cardLayout.show(contentPanel, "CONTRACTS"));
+
+        JButton payBtn = new JButton("Μισθοδοσία");
+        payBtn.addActionListener(e -> cardLayout.show(contentPanel, "PAYROLL"));
+
+        JButton repBtn = new JButton("Αναφορές");
+        repBtn.addActionListener(e -> cardLayout.show(contentPanel, "REPORTS"));
+
+        bar.add(empBtn);
+        bar.add(conBtn);
+        bar.add(payBtn);
+        bar.add(repBtn);
+
+        return bar;
     }
 }
