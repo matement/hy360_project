@@ -18,30 +18,29 @@ public class EmployeePanel extends JPanel {
         add(createButtons(), BorderLayout.SOUTH);
     }
 
-    // ================= TITLE =================
     private JLabel createTitle() {
         JLabel label = new JLabel("Διαχείριση Υπαλλήλων", SwingConstants.CENTER);
         label.setFont(label.getFont().deriveFont(Font.BOLD, 22f));
         return label;
     }
 
-    // ================= TABLE =================
     private JScrollPane createTable() {
 
         String[] columns = {
-            "ID",
-            "Όνομα",
-            "Οικ. Κατάσταση",
-            "Παιδιά",
-            "Ηλικίες Παιδιών",
-            "Κατηγορία",
-            "Τμήμα",
-            "Ημ. Έναρξης",
-            "Διεύθυνση",
-            "Τηλέφωνο",
-            "Τράπεζα",
-            "Αρ. Λογαριασμού",
-            "Κατάσταση"
+            "ID",                   // 0
+            "Όνομα",                // 1
+            "Οικ. Κατάσταση",       // 2
+            "Παιδιά",               // 3
+            "Ονόματα Παιδιών",      // 4 
+            "Ηλικίες Παιδιών",      // 5
+            "Κατηγορία",            // 6
+            "Τμήμα",                // 7
+            "Ημ. Έναρξης",          // 8
+            "Διεύθυνση",            // 9
+            "Τηλέφωνο",             // 10
+            "Τράπεζα",              // 11
+            "Αρ. Λογαριασμού",      // 12
+            "Κατάσταση"             // 13
         };
 
         model = new DefaultTableModel(columns, 0) {
@@ -57,6 +56,7 @@ public class EmployeePanel extends JPanel {
             "Γιώργος Παπαδόπουλος",
             "Έγγαμος",
             2,
+            "Μαρία, Γιάννης",
             "5, 8",
             "Διοικητικός",
             "Πληροφορική",
@@ -69,13 +69,13 @@ public class EmployeePanel extends JPanel {
         });
 
         table = new JTable(model);
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); 
+        table.getColumnModel().getColumn(4).setPreferredWidth(150);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         return new JScrollPane(table);
     }
 
-    // ================= BUTTONS =================
     private JPanel createButtons() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER,15,10));
 
@@ -94,11 +94,9 @@ public class EmployeePanel extends JPanel {
         panel.add(viewBtn);
         panel.add(fireBtn);
 
-
         return panel;
     }
 
-    // ================= ACTIONS =================
     private void onAdd() {
         EmployeeDialog dialog = new EmployeeDialog((JFrame) SwingUtilities.getWindowAncestor(this),
                 "Πρόσληψη Υπαλλήλου",false);
@@ -111,6 +109,7 @@ public class EmployeePanel extends JPanel {
                     dialog.getNameValue(),
                     dialog.getMaritalStatus(),
                     dialog.getNumChildren(),
+                    dialog.getChildrenNames(), 
                     dialog.getChildrenAges(),
                     dialog.getCategory(),
                     dialog.getDepartment(),
@@ -122,78 +121,85 @@ public class EmployeePanel extends JPanel {
                     "Ενεργός"
             });
         }
-
     }
 
     private void onEdit() {
-        if (!isRowSelected())return;
+        if (!isRowSelected()) return;
 
         int row = table.getSelectedRow();
 
         EmployeeDialog dialog = new EmployeeDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Επεξεργασία",false);
+        
         dialog.setFields(
-                (String) model.getValueAt(row, 1),
-                (String) model.getValueAt(row, 2),
-                (int) model.getValueAt(row, 3),
-                (String) model.getValueAt(row, 4),
-                (String) model.getValueAt(row, 5),
-                (String) model.getValueAt(row, 6),
-                (String) model.getValueAt(row, 7),
-                (String) model.getValueAt(row, 8),
-                (String) model.getValueAt(row, 9),
-                (String) model.getValueAt(row, 10),
-                (String) model.getValueAt(row, 11));
+                (String) model.getValueAt(row, 1),  // Name
+                (String) model.getValueAt(row, 2),  // Marital
+                (int) model.getValueAt(row, 3),     // Count
+                (String) model.getValueAt(row, 4),  // Names 
+                (String) model.getValueAt(row, 5),  // Ages
+                (String) model.getValueAt(row, 6),  // Category
+                (String) model.getValueAt(row, 7),  // Dept
+                (String) model.getValueAt(row, 8),  // Date
+                (String) model.getValueAt(row, 9),  // Address
+                (String) model.getValueAt(row, 10), // Phone
+                (String) model.getValueAt(row, 11), // Bank
+                (String) model.getValueAt(row, 12)  // IBAN
+        );
 
         dialog.setVisible(true);
         if (dialog.isConfirmed()) {
             model.setValueAt(dialog.getNameValue(), row, 1);
             model.setValueAt(dialog.getMaritalStatus(), row, 2);
             model.setValueAt(dialog.getNumChildren(), row, 3);
-            model.setValueAt(dialog.getChildrenAges(), row, 4);
-            model.setValueAt(dialog.getCategory(), row, 5);
-            model.setValueAt(dialog.getDepartment(), row, 6);
-            model.setValueAt(dialog.getStartDate(), row, 7);
-            model.setValueAt(dialog.getAddress(), row, 8);
-            model.setValueAt(dialog.getPhone(), row, 9);
-            model.setValueAt(dialog.getBankName(), row, 10);
-            model.setValueAt(dialog.getIban(), row, 11);
+            model.setValueAt(dialog.getChildrenNames(), row, 4);
+            model.setValueAt(dialog.getChildrenAges(), row, 5);
+            model.setValueAt(dialog.getCategory(), row, 6);
+            model.setValueAt(dialog.getDepartment(), row, 7);
+            model.setValueAt(dialog.getStartDate(), row, 8);
+            model.setValueAt(dialog.getAddress(), row, 9);
+            model.setValueAt(dialog.getPhone(), row, 10);
+            model.setValueAt(dialog.getBankName(), row, 11);
+            model.setValueAt(dialog.getIban(), row, 12);
         }
     }
 
     private void onView() {
-        if (!isRowSelected())return;
+        if (!isRowSelected()) return;
 
         int row = table.getSelectedRow();
 
         EmployeeDialog dialog = new EmployeeDialog(
                 (JFrame) SwingUtilities.getWindowAncestor(this),
                 "Προβολή",
-                true // <-- readOnly = true
+                true 
         );
 
         dialog.setFields(
                 (String) model.getValueAt(row, 1),
                 (String) model.getValueAt(row, 2),
                 (int) model.getValueAt(row, 3),
-                (String) model.getValueAt(row, 4),
+                (String) model.getValueAt(row, 4), 
                 (String) model.getValueAt(row, 5),
                 (String) model.getValueAt(row, 6),
                 (String) model.getValueAt(row, 7),
                 (String) model.getValueAt(row, 8),
                 (String) model.getValueAt(row, 9),
                 (String) model.getValueAt(row, 10),
-                (String) model.getValueAt(row, 11));
+                (String) model.getValueAt(row, 11),
+                (String) model.getValueAt(row, 12)
+        );
 
-    dialog.setVisible(true);
+        dialog.setVisible(true);
     }
 
     private void onFire() {
-        if (!isRowSelected())return;
+        if (!isRowSelected()) return;
         int row = table.getSelectedRow();
 
-        // Έλεγχος αν είναι η τελευταία μέρα του μήνα
         java.time.LocalDate today = java.time.LocalDate.now();
         java.time.LocalDate lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+        
+        // Uncomment this check for final:
+        /*
         if (!today.equals(lastDayOfMonth)) {
             JOptionPane.showMessageDialog(this,
                     "Η απόλυση μπορεί να γίνει μόνο την τελευταία μέρα του μήνα",
@@ -201,8 +207,8 @@ public class EmployeePanel extends JPanel {
                     JOptionPane.WARNING_MESSAGE);
             return;
         }
+        */
 
-        // Επιβεβαίωση από τον χρήστη
         int confirm = JOptionPane.showConfirmDialog(
                 this,
                 "Είσαι σίγουρος για την απόλυση του υπαλλήλου;",
@@ -210,8 +216,8 @@ public class EmployeePanel extends JPanel {
                 JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            // Αλλάζουμε την κατάσταση στον πίνακα σε "Απολυμένος"
-            model.setValueAt("Απολυμένος", row, 12); // η στήλη 13 είναι η "Κατάσταση"
+
+            model.setValueAt("Απολυμένος", row, 13); 
 
             JOptionPane.showMessageDialog(this,
                     "Ο υπάλληλος απολύθηκε. Η μισθοδοσία για το μήνα καταβλήθηκε.");

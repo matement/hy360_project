@@ -12,6 +12,7 @@ public class EmployeeDialog extends JDialog {
     private JComboBox<String> maritalBox;
     private JSpinner childrenSpinner;
     private JTextField childrenAgesField;
+    private JTextField childrenNamesField; 
 
     private JComboBox<String> categoryBox;
 
@@ -24,12 +25,10 @@ public class EmployeeDialog extends JDialog {
     private JTextField bankField;
     private JTextField ibanField;
 
-    private boolean readFlag;
 
     public EmployeeDialog(JFrame parent, String title, boolean readFlag) {
         super(parent, title, true);
-        this.readFlag=readFlag;
-        setSize(500, 600);
+        setSize(500, 650); 
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10, 10));
 
@@ -41,7 +40,6 @@ public class EmployeeDialog extends JDialog {
         }
     }
 
-    // ================= FORM =================
     private JPanel createForm() {
         JPanel panel = new JPanel(new GridLayout(0, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -49,6 +47,8 @@ public class EmployeeDialog extends JDialog {
         nameField = new JTextField();
         maritalBox = new JComboBox<>(new String[] { "Άγαμος", "Έγγαμος" });
         childrenSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));
+        
+        childrenNamesField = new JTextField();
         childrenAgesField = new JTextField();
 
         categoryBox = new JComboBox<>(new String[] { "Διοικητικός", "Διδακτικός" });
@@ -64,34 +64,43 @@ public class EmployeeDialog extends JDialog {
 
         panel.add(new JLabel("Όνομα:"));
         panel.add(nameField);
+        
         panel.add(new JLabel("Οικ. Κατάσταση:"));
         panel.add(maritalBox);
+        
         panel.add(new JLabel("Αριθμός Παιδιών:"));
         panel.add(childrenSpinner);
+        
+        panel.add(new JLabel("Ονόματα Παιδιών:")); 
+        panel.add(childrenNamesField);            
+        
         panel.add(new JLabel("Ηλικίες Παιδιών:"));
         panel.add(childrenAgesField);
+        
         panel.add(new JLabel("Κατηγορία:"));
         panel.add(categoryBox);
 
         panel.add(new JLabel("Τμήμα:"));
         panel.add(departmentField);
+        
         panel.add(new JLabel("Ημ. Έναρξης (YYYY-MM-DD):"));
         panel.add(startDateField);
 
         panel.add(new JLabel("Διεύθυνση:"));
         panel.add(addressField);
+        
         panel.add(new JLabel("Τηλέφωνο:"));
         panel.add(phoneField);
 
         panel.add(new JLabel("Τράπεζα:"));
         panel.add(bankField);
+        
         panel.add(new JLabel("IBAN:"));
         panel.add(ibanField);
 
         return panel;
     }
 
-    // ================= BUTTONS =================
     private JPanel createButtons() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
@@ -107,7 +116,6 @@ public class EmployeeDialog extends JDialog {
         return panel;
     }
 
-    // ================= VALIDATION =================
     private void onConfirm() {
         if (nameField.getText().isEmpty()) {
             error("Το όνομα είναι υποχρεωτικό");
@@ -129,11 +137,11 @@ public class EmployeeDialog extends JDialog {
                 return false;
             }
             if (date.isBefore(LocalDate.now().withDayOfMonth(1))) {
-                error("Δεν επιτρέπεται αναδρομική πρόσληψη");
-                return false;
+                 error("Δεν επιτρέπεται αναδρομική πρόσληψη");
+                 return false;
             }
         } catch (Exception e) {
-            error("Λάθος μορφή ημερομηνίας");
+            error("Λάθος μορφή ημερομηνίας (YYYY-MM-DD)");
             return false;
         }
         return true;
@@ -143,7 +151,6 @@ public class EmployeeDialog extends JDialog {
         JOptionPane.showMessageDialog(this, msg, "Σφάλμα", JOptionPane.ERROR_MESSAGE);
     }
 
-    // ================= GETTERS =================
     public boolean isConfirmed() {
         return confirmed;
     }
@@ -158,6 +165,10 @@ public class EmployeeDialog extends JDialog {
 
     public int getNumChildren() {
         return (int) childrenSpinner.getValue();
+    }
+
+    public String getChildrenNames() {
+        return childrenNamesField.getText();
     }
 
     public String getChildrenAges() {
@@ -196,6 +207,7 @@ public class EmployeeDialog extends JDialog {
             String name,
             String marital,
             int children,
+            String childrenNames, 
             String ages,
             String category,
             String department,
@@ -204,9 +216,12 @@ public class EmployeeDialog extends JDialog {
             String phone,
             String bank,
             String iban) {
+        
         nameField.setText(name);
         maritalBox.setSelectedItem(marital);
         childrenSpinner.setValue(children);
+        
+        childrenNamesField.setText(childrenNames); 
         childrenAgesField.setText(ages);
 
         categoryBox.setSelectedItem(category);
@@ -223,6 +238,7 @@ public class EmployeeDialog extends JDialog {
         nameField.setEditable(false);
         maritalBox.setEnabled(false);
         childrenSpinner.setEnabled(false);
+        childrenNamesField.setEditable(false);
         childrenAgesField.setEditable(false);
         categoryBox.setEnabled(false);
         departmentField.setEditable(false);
@@ -232,5 +248,4 @@ public class EmployeeDialog extends JDialog {
         bankField.setEditable(false);
         ibanField.setEditable(false);
     }
-
 }
