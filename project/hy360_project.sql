@@ -208,7 +208,7 @@ JOIN Role r ON e.Role_roleID = r.roleID
 JOIN Department d ON e.Department_departmentID = d.departmentID
 JOIN Employment_type et ON e.Employment_type_typeID = et.typeID
 LEFT JOIN Contract c ON e.idEmployee = c.Employee_idEmployee
-LEFT JOIN Allowences a ON e.idEmployee = a.Employee_idEmployee;
+LEFT JOIN Allowences a ON e.Employment_type_typeID = a.typeID;
 
 -- View 2: Payroll Stats per Department
 CREATE OR REPLACE VIEW View_Department_Payroll AS
