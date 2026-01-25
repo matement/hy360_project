@@ -1,9 +1,8 @@
 package JDBC;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.*;
+import javax.swing.table.DefaultTableModel;
+import java.util.Vector;
 
 public class DatabaseHelper {
 
@@ -81,5 +80,35 @@ public class DatabaseHelper {
 
             System.out.println("[System]: Database setup completed (3NF Ready).");
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    public static DefaultTableModel executeQuery(String sqlQuery) throws SQLException {
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlQuery)) {
+
+            // 1. Παίρνουμε πληροφορίες για τις στήλες (Metadata)
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            // 2. Δημιουργία των ονομάτων των στηλών
+            Vector<String> columnNames = new Vector<>();
+            for (int i = 1; i <= columnCount; i++) {
+                columnNames.add(metaData.getColumnName(i));
+            }
+
+            // 3. Δημιουργία των δεδομένων (Γραμμές)
+            Vector<Vector<Object>> data = new Vector<>();
+            while (rs.next()) {
+                Vector<Object> row = new Vector<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    row.add(rs.getObject(i));
+                }
+                data.add(row);
+            }
+
+            // 4. Επιστροφή έτοιμου μοντέλου για το JTable
+            return new DefaultTableModel(data, columnNames);
+        }
     }
 }

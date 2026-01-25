@@ -159,19 +159,49 @@ public class ReportsPanel extends JPanel {
     }
 
     private void executeRawSql() {
+//        String query = sqlArea.getText().trim();
+//        if (query.isEmpty()) return;
+//
+//        // MOCK RESPONSE
+//        if (query.toLowerCase().startsWith("select")) {
+//            tableModel.setRowCount(0);
+//            tableModel.setColumnCount(0);
+//            setColumns("Result A", "Result B", "Result C");
+//            tableModel.addRow(new Object[]{"Data 1", "Data 2", "Data 3"});
+//            tableModel.addRow(new Object[]{"Data 4", "Data 5", "Data 6"});
+//            JOptionPane.showMessageDialog(this, "Query Executed Successfully (Mock Mode)");
+//        } else {
+//            JOptionPane.showMessageDialog(this, "Παρακαλώ εισάγετε εντολή SELECT", "Warning", JOptionPane.WARNING_MESSAGE);
+//        }
         String query = sqlArea.getText().trim();
         if (query.isEmpty()) return;
 
-        // MOCK RESPONSE
-        if (query.toLowerCase().startsWith("select")) {
-            tableModel.setRowCount(0);
-            tableModel.setColumnCount(0);
-            setColumns("Result A", "Result B", "Result C");
-            tableModel.addRow(new Object[]{"Data 1", "Data 2", "Data 3"});
-            tableModel.addRow(new Object[]{"Data 4", "Data 5", "Data 6"});
-            JOptionPane.showMessageDialog(this, "Query Executed Successfully (Mock Mode)");
-        } else {
-            JOptionPane.showMessageDialog(this, "Παρακαλώ εισάγετε εντολή SELECT", "Warning", JOptionPane.WARNING_MESSAGE);
+        // Επιτρέπουμε μόνο SELECT για ασφάλεια (προαιρετικό)
+        if (!query.toLowerCase().startsWith("select")) {
+            JOptionPane.showMessageDialog(this,
+                    "Επιτρέπονται μόνο εντολές SELECT σε αυτό το παράθυρο.",
+                    "Προσοχή", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            // Καλούμε τη νέα μέθοδο από το DatabaseHelper
+            DefaultTableModel newModel = JDBC.DatabaseHelper.executeQuery(query);
+
+            // Ενημερώνουμε τον πίνακα με τα νέα δεδομένα
+            resultTable.setModel(newModel);
+
+            // Κρατάμε αναφορά στο νέο μοντέλο (αν το χρησιμοποιείς αλλού)
+            this.tableModel = newModel;
+
+            JOptionPane.showMessageDialog(this, "Το ερώτημα εκτελέστηκε επιτυχώς!");
+
+        } catch (java.sql.SQLException ex) {
+            // Εμφάνιση σφάλματος αν το SQL είναι λάθος
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Σφάλμα SQL: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
