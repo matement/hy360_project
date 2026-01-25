@@ -32,7 +32,6 @@ public class SalaryRateDAO {
             return;
         }
 
-        // FIX: Update using a JOIN (or subquery) to link role_name to ID
         String sql = "UPDATE Salary_rates s " +
                 "JOIN Role r ON s.Role_roleID = r.roleID " +
                 "SET s.base_salary = ? " +
@@ -50,7 +49,6 @@ public class SalaryRateDAO {
 
     public Map<String, Double> getAllSalaryRates() {
         Map<String, Double> rates = new HashMap<>();
-        // FIX: Join with Role table to get the names
         String sql = "SELECT r.role_name, s.base_salary " +
                 "FROM Salary_rates s " +
                 "JOIN Role r ON s.Role_roleID = r.roleID";

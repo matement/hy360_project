@@ -5,6 +5,7 @@ import java.sql.*;
 
 public class EmployeeManager {
 
+    // Βοηθητική μέθοδος για εύρεση ID
     private int getLookupId(Connection conn, String tableName, String idCol, String valCol, String value) throws SQLException {
         String sql = "SELECT " + idCol + " FROM " + tableName + " WHERE " + valCol + " = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -17,10 +18,11 @@ public class EmployeeManager {
         throw new SQLException("Error: ID not found for table " + tableName + " with value: " + value);
     }
 
+    // --- 1. Πρόσληψη Μόνιμου Διδακτικού ---
     public void hirePermanentTeaching(int id, String name, String address, String iban,
                                       String phone, boolean isMarried, String bank,
                                       String departmentName, Date startDate,
-                                      int yearsOfEmployment, double researchAllowance) {
+                                      int yearsOfEmployment) {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
@@ -46,13 +48,6 @@ public class EmployeeManager {
                 ps.executeUpdate();
             }
 
-            String sqlAllow = "INSERT INTO Allowences (Employee_idEmployee, research_allowence, library_allowence) VALUES (?, ?, 0)";
-            try (PreparedStatement ps = conn.prepareStatement(sqlAllow)) {
-                ps.setInt(1, id);
-                ps.setDouble(2, researchAllowance);
-                ps.executeUpdate();
-            }
-
             conn.commit();
             System.out.println("Success: Permanent Teaching Employee hired.");
 
@@ -62,6 +57,7 @@ public class EmployeeManager {
         }
     }
 
+    // --- 2. Πρόσληψη Μόνιμου Διοικητικού ---
     public void hirePermanentAdministrative(int id, String name, String address, String iban,
                                             String phone, boolean isMarried, String bank,
                                             String departmentName, Date startDate,
@@ -91,12 +87,6 @@ public class EmployeeManager {
                 ps.executeUpdate();
             }
 
-            String sqlAllow = "INSERT INTO Allowences (Employee_idEmployee, research_allowence, library_allowence) VALUES (?, 0, 0)";
-            try (PreparedStatement ps = conn.prepareStatement(sqlAllow)) {
-                ps.setInt(1, id);
-                ps.executeUpdate();
-            }
-
             conn.commit();
             System.out.println("Success: Permanent Administrative Employee hired.");
 
@@ -106,10 +96,10 @@ public class EmployeeManager {
         }
     }
 
+    // --- 3. Πρόσληψη Συμβασιούχου Διδακτικού ---
     public void hireContractorTeaching(int id, String name, String address, String iban,
                                        String phone, boolean isMarried, String bank,
-                                       String departmentName, Date startDate,
-                                       double libraryAllowance) {
+                                       String departmentName, Date startDate) {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
@@ -135,13 +125,6 @@ public class EmployeeManager {
                 ps.executeUpdate();
             }
 
-            String sqlAllow = "INSERT INTO Allowences (Employee_idEmployee, research_allowence, library_allowence) VALUES (?, 0, ?)";
-            try (PreparedStatement ps = conn.prepareStatement(sqlAllow)) {
-                ps.setInt(1, id);
-                ps.setDouble(2, libraryAllowance);
-                ps.executeUpdate();
-            }
-
             conn.commit();
             System.out.println("Success: Contractor Teaching Employee hired.");
 
@@ -151,6 +134,7 @@ public class EmployeeManager {
         }
     }
 
+    // --- 4. Πρόσληψη Συμβασιούχου Διοικητικού ---
     public void hireContractorAdministrative(int id, String name, String address, String iban,
                                              String phone, boolean isMarried, String bank,
                                              String departmentName, Date startDate) {
@@ -179,12 +163,6 @@ public class EmployeeManager {
                 ps.executeUpdate();
             }
 
-            String sqlAllow = "INSERT INTO Allowences (Employee_idEmployee, research_allowence, library_allowence) VALUES (?, 0, 0)";
-            try (PreparedStatement ps = conn.prepareStatement(sqlAllow)) {
-                ps.setInt(1, id);
-                ps.executeUpdate();
-            }
-
             conn.commit();
             System.out.println("Success: Contractor Administrative Employee hired.");
 
@@ -193,6 +171,8 @@ public class EmployeeManager {
             e.printStackTrace();
         }
     }
+
+    // --- ΒΟΗΘΗΤΙΚΕΣ ΜΕΘΟΔΟΙ ---
 
     public void updateEmployeeDetails(int id, String newAddress, String newPhone, String newIban, String newBank, boolean newIsMarried) {
         String sql = "UPDATE Employee SET address = ?, phone_number = ?, iban = ?, bank = ?, is_Married = ? WHERE idEmployee = ?";
@@ -211,6 +191,7 @@ public class EmployeeManager {
     }
 
     public void fireEmployee(int id) {
+        // Soft Delete (Is_Active = 0)
         String sql = "UPDATE Employee SET Is_Active = 0 WHERE idEmployee = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -218,34 +199,7 @@ public class EmployeeManager {
             int rows = ps.executeUpdate();
             if (rows > 0) System.out.println("Success: Employee " + id + " is now inactive (fired).");
             else System.out.println("Error: Employee not found.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void updateGlobalResearchAllowance(double newAmount) {
-        DAO.AllowanceDAO dao = new DAO.AllowanceDAO();
-
-        // Έλεγχος Μείωσης
-        double current = dao.getResearchAllowance();
-        if (newAmount < current) {
-            System.out.println("ΣΦΑΛΜΑ: Η μείωση απαγορεύεται (Τρέχον: " + current + "€).");
-            return;
-        }
-
-        dao.updateResearchAllowance(newAmount);
-    }
-
-    public void updateGlobalLibraryAllowance(double newAmount) {
-        DAO.AllowanceDAO dao = new DAO.AllowanceDAO();
-
-        double current = dao.getLibraryAllowance();
-        if (newAmount < current) {
-            System.out.println("ΣΦΑΛΜΑ: Η μείωση απαγορεύεται (Τρέχον: " + current + "€).");
-            return;
-        }
-
-        dao.updateLibraryAllowance(newAmount);
+        } catch (SQLException e) { e.printStackTrace(); }
     }
 
     public void addChild(int employeeId, String childName, int age) {
@@ -285,4 +239,25 @@ public class EmployeeManager {
         System.out.println("Payroll finished.");
     }
 
+    // --- GLOBAL ALLOWANCE UPDATES (NEW) ---
+
+    public void updateGlobalResearchAllowance(double newAmount) {
+        DAO.AllowanceDAO dao = new DAO.AllowanceDAO();
+        double current = dao.getResearchAllowance();
+        if (newAmount < current) {
+            System.out.println("ΣΦΑΛΜΑ: Η μείωση του επιδόματος απαγορεύεται από τον κανονισμό (Τρέχον: " + current + "€).");
+            return;
+        }
+        dao.updateResearchAllowance(newAmount);
+    }
+
+    public void updateGlobalLibraryAllowance(double newAmount) {
+        DAO.AllowanceDAO dao = new DAO.AllowanceDAO();
+        double current = dao.getLibraryAllowance();
+        if (newAmount < current) {
+            System.out.println("ΣΦΑΛΜΑ: Η μείωση του επιδόματος απαγορεύεται (Τρέχον: " + current + "€).");
+            return;
+        }
+        dao.updateLibraryAllowance(newAmount);
+    }
 }

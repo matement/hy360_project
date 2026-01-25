@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Random;
 
 //connects ui with backend
@@ -20,6 +21,7 @@ public class controller {
     private ReportDAO reportDAO;
     private ContractDAO contractDAO;
     private SalaryRateDAO salaryRateDAO;
+    private AllowanceDAO allowanceDAO;
 
     public controller() {
         this.manager = new EmployeeManager();
@@ -28,6 +30,7 @@ public class controller {
         this.reportDAO = new ReportDAO();
         this.contractDAO = new ContractDAO();
         this.salaryRateDAO = new SalaryRateDAO();
+        this.allowanceDAO = new AllowanceDAO();
     }
 
     //initializes the database
@@ -87,9 +90,9 @@ public class controller {
             if (cat.contains("ADMINISTRATIVE") && cat.contains("PERMANENT")) {
                 manager.hirePermanentAdministrative(nextId, name, addr, iban, phone, isMarried, bank, dept, startDate, 0);
             } else if (cat.contains("TEACHING") && cat.contains("PERMANENT")) {
-                manager.hirePermanentTeaching(nextId, name, addr, iban, phone, isMarried, bank, dept, startDate, 0, 200.0);
+                manager.hirePermanentTeaching(nextId, name, addr, iban, phone, isMarried, bank, dept, startDate, 0);
             } else if (cat.contains("TEACHING") && cat.contains("CONTRACTOR")) {
-                manager.hireContractorTeaching(nextId, name, addr, iban, phone, isMarried, bank, dept, startDate, 150.0);
+                manager.hireContractorTeaching(nextId, name, addr, iban, phone, isMarried, bank, dept, startDate);
                 Date end = (endDateStr != null) ? Date.valueOf(endDateStr) : Date.valueOf(startDate.toLocalDate().plusMonths(6));
                 manager.renewContract(nextId, startDate, end, 900.0);
             } else if (cat.contains("ADMINISTRATIVE") && cat.contains("CONTRACTOR")) {
@@ -161,9 +164,22 @@ public class controller {
         return reportDAO.getTotalCostPerRole(month, year);
     }
 
-    //retrieves salary rates
+    /**
+     * Επιστρέφει ΕΝΙΑΙΟ Map που περιέχει:
+     * 1. Τους Βασικούς Μισθούς (Κλειδιά: "TEACHING", "ADMINISTRATIVE")
+     * 2. Τα Γενικά Επιδόματα (Κλειδιά: "RESEARCH_ALLOWANCE", "LIBRARY_ALLOWANCE")
+     */
     public Map<String, Double> getAllSalaryRates() {
-        return salaryRateDAO.getAllSalaryRates();
+        // 1. Παίρνουμε τους μισθούς από τη βάση (εξαρτάται πώς ονόμασες τη μέθοδο στο SalaryRateDAO)
+        // Αν το SalaryRateDAO επιστρέφει ήδη Map, το αντιγράφουμε σε νέο HashMap για να είναι τροποποιήσιμο.
+        Map<String, Double> combinedRates = new HashMap<>(salaryRateDAO.getAllSalaryRates());
+
+        // 2. Προσθέτουμε χειροκίνητα τα επιδόματα από το AllowanceDAO
+        // Χρησιμοποιούμε ΑΚΡΙΒΩΣ τα ίδια κλειδιά που περιμένει το PayrollPanel
+        combinedRates.put("RESEARCH_ALLOWANCE", allowanceDAO.getResearchAllowance());
+        combinedRates.put("LIBRARY_ALLOWANCE", allowanceDAO.getLibraryAllowance());
+
+        return combinedRates;
     }
 
     //updates base salary

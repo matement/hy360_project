@@ -12,7 +12,6 @@ public class ReportDAO {
     // 1. History (Simple Select)
     public List<String> getPaymentHistory(int employeeId) {
         List<String> history = new ArrayList<>();
-        // FIX: Use simple select for history
         String sql = "SELECT date, amount FROM Payment WHERE Employee_idEmployee = ? ORDER BY date DESC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -52,7 +51,6 @@ public class ReportDAO {
     // 3. Total Cost (Simple Sum)
     public double getTotalPayrollCost(int month, int year) {
         double total = 0;
-        // FIX: Use simple SUM query
         String sql = "SELECT SUM(amount) FROM Payment WHERE MONTH(date) = ? AND YEAR(date) = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -68,7 +66,6 @@ public class ReportDAO {
     // 4. Cost Per Role (Group By Sum)
     public Map<String, Double> getTotalCostPerRole(int month, int year) {
         Map<String, Double> costs = new HashMap<>();
-        // FIX: Use SUM grouped by role
         String sql = "SELECT r.role_name as role, SUM(p.amount) as total " +
                 "FROM Payment p " +
                 "JOIN Employee e ON p.Employee_idEmployee = e.idEmployee " +

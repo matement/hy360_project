@@ -10,7 +10,6 @@ public class EmployeeDAO {
 
     public Employee getEmployeeById(int id) {
         Employee emp = null;
-        // ΔΙΟΡΘΩΣΗ: Προσθήκη JOIN με Employment_type και σωστά ονόματα στηλών
         String sql = "SELECT e.*, r.role_name, d.department_name, et.type_name " +
                 "FROM Employee e " +
                 "JOIN Role r ON e.Role_roleID = r.roleID " +
@@ -33,7 +32,6 @@ public class EmployeeDAO {
 
     public List<Employee> getAllEmployees() {
         List<Employee> list = new ArrayList<>();
-        // ΔΙΟΡΘΩΣΗ: Προσθήκη JOINS και εδώ
         String sql = "SELECT e.*, r.role_name, d.department_name, et.type_name " +
                 "FROM Employee e " +
                 "JOIN Role r ON e.Role_roleID = r.roleID " +
@@ -65,7 +63,6 @@ public class EmployeeDAO {
         emp.setDepartmentName(rs.getString("department_name")); // Όχι "Department_Department_name"
         emp.setActive(rs.getInt("Is_Active") == 1);
 
-        // ΚΡΙΣΙΜΕΣ ΑΛΛΑΓΕΣ:
         emp.setRole(rs.getString("role_name"));       // Διάβασε το σωστό όνομα ρόλου (TEACHING/ADMINISTRATIVE)
         emp.setEmploymentType(rs.getString("type_name")); // Διάβασε τον τύπο (PERMANENT/CONTRACTOR)
         return emp;
