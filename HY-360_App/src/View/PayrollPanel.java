@@ -5,7 +5,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 public class PayrollPanel extends JPanel {
@@ -18,22 +17,22 @@ public class PayrollPanel extends JPanel {
     public PayrollPanel(controller controller) {
         this.controller = controller;
         
-        // Απλό Layout: 2 γραμμές (Πάνω: Ρυθμίσεις, Κάτω: Ενέργειες)
+    
         setLayout(new GridLayout(2, 1, 15, 15));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         add(createRatesPanel());
         add(createActionPanel());
 
-        loadRates(); // Φόρτωμα δεδομένων κατά την εκκίνηση
+        loadRates(); 
     }
 
-    // --- 1. ΠΑΝΕΛ ΡΥΘΜΙΣΕΩΝ ΜΙΣΘΩΝ ---
+    
     private JPanel createRatesPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createTitledBorder("Βασικοί Μισθοί & Επιδόματα"));
 
-        // Πίνακας
+        
         String[] cols = {"Κατηγορία / Ρόλος", "Ποσό (€)"};
         ratesModel = new DefaultTableModel(cols, 0) {
             @Override
@@ -43,7 +42,7 @@ public class PayrollPanel extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setRowHeight(25);
 
-        // Κουμπί Επεξεργασίας
+        
         JButton editBtn = new JButton("Αλλαγή Μισθού");
         editBtn.addActionListener(e -> onEditRate(table));
 
@@ -53,7 +52,7 @@ public class PayrollPanel extends JPanel {
         return panel;
     }
 
-    // --- 2. ΠΑΝΕΛ ΕΚΤΕΛΕΣΗΣ (ΧΩΡΙΣ ΤΟ ΚΟΥΜΠΙ ΣΤΑΤΙΣΤΙΚΩΝ) ---
+
     private JPanel createActionPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Διαχείριση Μισθοδοσίας"));
@@ -62,7 +61,7 @@ public class PayrollPanel extends JPanel {
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Επιλογές Ημερομηνίας
+    
         String[] months = {
             "1 - Ιανουάριος", "2 - Φεβρουάριος", "3 - Μάρτιος", "4 - Απρίλιος", 
             "5 - Μάιος", "6 - Ιούνιος", "7 - Ιούλιος", "8 - Αύγουστος", 
@@ -74,13 +73,13 @@ public class PayrollPanel extends JPanel {
         yearSpinner = new JSpinner(new SpinnerNumberModel(currentYear, 2020, 2050, 1));
         yearSpinner.setEditor(new JSpinner.NumberEditor(yearSpinner, "#"));
 
-        // Κουμπί
+        
         JButton runBtn = new JButton("Εκτέλεση Μισθοδοσίας");
-        runBtn.setBackground(new Color(220, 255, 220)); // Ελαφρύ πράσινο
+        runBtn.setBackground(new Color(220, 255, 220));
         runBtn.setFont(new Font("Arial", Font.BOLD, 14));
         runBtn.addActionListener(e -> onRunPayroll());
 
-        // Τοποθέτηση στο Grid
+        
         gbc.gridx = 0; gbc.gridy = 0;
         panel.add(new JLabel("Επιλογή Μήνα:"), gbc);
         
@@ -102,7 +101,7 @@ public class PayrollPanel extends JPanel {
         return panel;
     }
 
-    // --- LOGIC: ΦΟΡΤΩΜΑ ΔΕΔΟΜΕΝΩΝ ---
+   
     private void loadRates() {
         ratesModel.setRowCount(0);
         Map<String, Double> rates = controller.getAllSalaryRates();
@@ -111,7 +110,7 @@ public class PayrollPanel extends JPanel {
         }
     }
 
-    // --- LOGIC: ΕΠΕΞΕΡΓΑΣΙΑ ΜΙΣΘΟΥ ---
+   
     private void onEditRate(JTable table) {
         int row = table.getSelectedRow();
         if (row == -1) {
@@ -129,7 +128,7 @@ public class PayrollPanel extends JPanel {
             try {
                 double newVal = Double.parseDouble(input);
                 
-                // Έλεγχος: Απαγόρευση μείωσης
+            
                 if (newVal < currentVal) {
                     JOptionPane.showMessageDialog(this, 
                         "Δεν επιτρέπεται η μείωση μισθού!", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
@@ -137,7 +136,7 @@ public class PayrollPanel extends JPanel {
                 }
 
                 controller.updateBaseSalary(role, newVal);
-                loadRates(); // Ανανέωση πίνακα
+                loadRates();
                 JOptionPane.showMessageDialog(this, "Ο μισθός ενημερώθηκε!");
 
             } catch (NumberFormatException e) {
@@ -146,12 +145,11 @@ public class PayrollPanel extends JPanel {
         }
     }
 
-    // --- LOGIC: ΕΚΤΕΛΕΣΗ ΜΙΣΘΟΔΟΣΙΑΣ ---
+
     private void onRunPayroll() {
         int month = monthBox.getSelectedIndex() + 1;
         int year = (Integer) yearSpinner.getValue();
 
-        // 1. Εκτέλεση
         controller.runPayroll(month, year);
     }
 }

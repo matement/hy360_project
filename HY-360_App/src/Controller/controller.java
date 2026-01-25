@@ -5,7 +5,6 @@ import Backend.PayrollManager;
 import DAO.*;
 import JDBC.DatabaseHelper;
 import Model.Employee;
-
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,6 @@ public class controller {
         DatabaseHelper.setupDatabaseData();
     }
 
-    // --- 1. ΛΙΣΤΑ ΥΠΑΛΛΗΛΩΝ ---
     public List<Object[]> getAllEmployees() {
         List<Object[]> list = new ArrayList<>();
         List<Employee> employees = employeeDAO.getAllEmployees();
@@ -72,7 +70,6 @@ public class controller {
         return contractDAO.getLatestContractEndDate(employeeId);
     }
 
-    // --- 2. ΔΙΑΧΕΙΡΙΣΗ ΥΠΑΛΛΗΛΩΝ ---
     public boolean addEmployee(String name, String marital, int kids, String kNames, String kAges,
                                String cat, String dept, String dateStr, String addr, String phone,
                                String bank, String iban, String endDateStr) { 
@@ -129,49 +126,27 @@ public class controller {
         manager.renewContract(id, start, end, salary);
     }
 
-    // --- 3. ΜΙΣΘΟΔΟΣΙΑ ---
     public void runPayroll(int month, int year) {
         payrollManager.runMonthlyPayroll(month, year);
     }
 
-    // --- 4. REPORTING (ΟΙ ΜΕΘΟΔΟΙ ΠΟΥ ΕΛΕΙΠΑΝ) ---
-
-    // Μέθοδος για το κείμενο στατιστικών (επιστρέφει String)
-    public String getAnalyticsReportText() {
-        StringBuilder sb = new StringBuilder();
-        int currentMonth = java.time.LocalDate.now().getMonthValue();
-        int currentYear = java.time.LocalDate.now().getYear();
-
-        sb.append("=== ΑΝΑΛΥΤΙΚΗ ΑΝΑΦΟΡΑ ΜΙΣΘΟΔΟΣΙΑΣ ===\n\n");
-
-        // 1. Στατιστικά ανά Ρόλο
-        sb.append(">> Στατιστικά Μισθών ανά Κατηγορία:\n");
-        sb.append("------------------------------------------------\n");
-        Map<String, String> stats = reportDAO.getSalaryStatsPerRole();
-        for (String role : stats.keySet()) {
-            sb.append(String.format("%-25s : %s\n", role, stats.get(role)));
-        }
-        sb.append("\n");
-
-        // 2. Συνολικό Κόστος
-        double totalCost = reportDAO.getTotalPayrollCost(currentMonth, currentYear);
-        sb.append(">> Συνολικό Κόστος (" + currentMonth + "/" + currentYear + "):\n");
-        sb.append("------------------------------------------------\n");
-        sb.append(String.format("ΣΥΝΟΛΟ: %.2f €\n\n", totalCost));
-
-        // 3. Κόστος ανά Ρόλο
-        sb.append(">> Ανάλυση Κόστους ανά Ρόλο:\n");
-        sb.append("------------------------------------------------\n");
-        Map<String, Double> costPerRole = reportDAO.getTotalCostPerRole(currentMonth, currentYear);
-        for (String role : costPerRole.keySet()) {
-            sb.append(String.format("%-25s : %.2f €\n", role, costPerRole.get(role)));
-        }
-        
-        sb.append("\n================================================");
-        return sb.toString();
+    public List<String> getPaymentHistory(int employeeId) {
+        return reportDAO.getPaymentHistory(employeeId);
     }
 
-    // --- 5. SALARY RATES ---
+    public Map<String, String> getSalaryStatsPerRole() {
+        return reportDAO.getSalaryStatsPerRole();
+    }
+
+    public double getTotalPayrollCost(int month, int year) {
+        return reportDAO.getTotalPayrollCost(month, year);
+    }
+
+    public Map<String, Double> getTotalCostPerRole(int month, int year) {
+        return reportDAO.getTotalCostPerRole(month, year);
+    }
+
+
     public Map<String, Double> getAllSalaryRates() {
         return salaryRateDAO.getAllSalaryRates();
     }

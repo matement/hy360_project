@@ -31,15 +31,13 @@ public class EmployeePanel extends JPanel {
         
         for (Object[] row : rows) {
             
-            // --- ΦΙΛΤΡΟ: ΕΜΦΑΝΙΣΗ ΜΟΝΟ PERMANENT ---
             String category = (String) row[6]; 
             
             if (category == null || 
                (!category.contains("PERMANENT") && !category.contains("Μόνιμος"))) {
                 continue; 
             }
-            // ----------------------------------------
-
+           
             model.addRow(row);
         }
     }
@@ -109,8 +107,6 @@ public class EmployeePanel extends JPanel {
             String selectedRole = dialog.getCategory(); 
             String fullCategory = "PERMANENT " + selectedRole;
 
-            // --- ΣΗΜΕΙΟ ΔΙΟΡΘΩΣΗΣ ---
-            // Προστέθηκε η 13η παράμετρος (null) στο τέλος
             boolean success = controller.addEmployee(
                     dialog.getNameValue(),
                     dialog.getMaritalStatus(),
@@ -124,7 +120,7 @@ public class EmployeePanel extends JPanel {
                     dialog.getPhone(),
                     dialog.getBankName(),
                     dialog.getIban(),
-                    null // <--- ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ (null για μόνιμους)
+                    null 
             );
 
             if (success) {
@@ -158,10 +154,7 @@ public class EmployeePanel extends JPanel {
                 (String) model.getValueAt(row, 12)
         );
 
-        // --- Η ΑΛΛΑΓΗ ΕΙΝΑΙ ΕΔΩ ---
-        dialog.disableFixedFields(); // <--- Κλειδώνει Ημερομηνία, Τμήμα, Κατηγορία
-        // -------------------------
-
+        dialog.disableFixedFields(); 
         dialog.setVisible(true);
         
         if (dialog.isConfirmed()) {
@@ -172,9 +165,9 @@ public class EmployeePanel extends JPanel {
                 dialog.getNumChildren(),
                 dialog.getChildrenNames(),
                 dialog.getChildrenAges(),
-                dialog.getCategory(),   // Στέλνει την παλιά (κλειδωμένη) τιμή
-                dialog.getDepartment(), // Στέλνει την παλιά (κλειδωμένη) τιμή
-                dialog.getStartDate(),  // Στέλνει την παλιά (κλειδωμένη) τιμή
+                dialog.getCategory(),   
+                dialog.getDepartment(), 
+                dialog.getStartDate(),  
                 dialog.getAddress(),
                 dialog.getPhone(),
                 dialog.getBankName(),

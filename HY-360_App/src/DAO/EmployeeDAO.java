@@ -107,7 +107,6 @@ public class EmployeeDAO {
         return amount;
     }
 
-    // Μέθοδος που φέρνει λίστα με πίνακες [Όνομα, Ηλικία] για τα παιδιά ενός υπαλλήλου
     public java.util.List<String[]> getChildren(int employeeId) {
         java.util.List<String[]> children = new java.util.ArrayList<>();
         String sql = "SELECT name, age FROM Child WHERE Employee_idEmployee = ?";

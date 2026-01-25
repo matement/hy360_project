@@ -4,8 +4,6 @@ import Controller.controller;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 public class ContractPanel extends JPanel {
@@ -33,16 +31,14 @@ public class ContractPanel extends JPanel {
 
         for (Object[] row : rows) {
             
-            // --- ΦΙΛΤΡΟ: ΕΜΦΑΝΙΣΗ ΜΟΝΟ CONTRACTORS ---
-            String category = (String) row[6]; // Η στήλη της κατηγορίας
             
-            // Αν η κατηγορία ΔΕΝ περιέχει "CONTRACTOR" και ΔΕΝ περιέχει "Συμβασιούχος"
-            // τότε προσπέρασε αυτή την εγγραφή (continue)
+            String category = (String) row[6]; 
+            
             if (category == null || 
                (!category.contains("CONTRACTOR") && !category.contains("Συμβασιούχος"))) {
                 continue; 
             }
-            // -----------------------------------------
+            
 
             Object[] guiRow = new Object[14];
             guiRow[0] = row[0]; // ID
@@ -55,8 +51,6 @@ public class ContractPanel extends JPanel {
             guiRow[7] = row[7]; // Dept
             guiRow[8] = row[8]; // Start Date
             
-            // Ζητάμε από τον Controller την ημερομηνία λήξης για να τη δείξουμε στον πίνακα
-            // (Αντί για "---", τώρα θα δείχνει π.χ. "2026-06-30")
             String endDate = controller.getContractEndDate((int) row[0]);
             guiRow[9] = (endDate != null) ? endDate : "---";  
             
@@ -141,7 +135,6 @@ public class ContractPanel extends JPanel {
 
         if (d.isConfirmed()) {
             
-            // Κολλάμε το "CONTRACTOR" για να περάσει το φίλτρο
             String rawCat = d.getCategory(); 
             String fullCat = "CONTRACTOR " + rawCat; 
             
@@ -151,7 +144,7 @@ public class ContractPanel extends JPanel {
                 fullCat, 
                 d.getDepartment(), d.getStart(), d.getAddress(),
                 d.getPhone(), d.getBank(), d.getIban(),
-                d.getEnd() // <--- ΕΔΩ ΠΡΟΣΤΕΘΗΚΕ Η ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ
+                d.getEnd()
             );
 
             if (success) {
@@ -191,18 +184,16 @@ public class ContractPanel extends JPanel {
                 (String) model.getValueAt(row, 13)
         );
 
-        // --- Η ΑΛΛΑΓΗ ΕΙΝΑΙ ΕΔΩ ---
-        d.disableFixedFields(); // <--- Κλειδώνει Ημερομηνίες, Τμήμα και Κατηγορία
-        // -------------------------
-
+       
+        d.disableFixedFields(); 
         d.setVisible(true);
 
         if (d.isConfirmed()) {
             boolean success = controller.updateEmployee(
                 id, d.getName(), d.getMarital(), d.getChildren(),
                 d.getChildrenNames(), d.getAges(), 
-                d.getCategory(),    // Θα στείλει την παλιά τιμή (αφού είναι κλειδωμένο)
-                d.getDepartment(),  // Θα στείλει την παλιά τιμή
+                d.getCategory(),    
+                d.getDepartment(),  
                 d.getStart(), d.getAddress(),
                 d.getPhone(), d.getBank(), d.getIban()
             );
@@ -249,10 +240,10 @@ public class ContractPanel extends JPanel {
         int row = table.getSelectedRow();
         int id = (int) model.getValueAt(row, 0); 
 
-        // Παίρνουμε την παλιά ημερομηνία λήξης από τον πίνακα
+      
         String oldEndStr = (String) model.getValueAt(row, 9);
 
-        // Ανοίγουμε το νέο Dialog
+      
         RenewContractDialog dialog = new RenewContractDialog(
                 (JFrame) SwingUtilities.getWindowAncestor(this), 
                 oldEndStr
@@ -262,7 +253,7 @@ public class ContractPanel extends JPanel {
 
         if (dialog.isConfirmed()) {
             try {
-                // Καλούμε τον Controller με τις έτοιμες ημερομηνίες από το Dialog
+                
                 controller.renewContract(
                     id, 
                     dialog.getStartDate(), 

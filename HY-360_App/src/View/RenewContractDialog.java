@@ -9,15 +9,11 @@ public class RenewContractDialog extends JDialog {
 
     private boolean confirmed = false;
     private LocalDate oldEndDate;
-
     private JComboBox<String> startMonthBox;
     private JSpinner startYearSpinner;
-    
     private JComboBox<String> endMonthBox;
     private JSpinner endYearSpinner;
-    
     private JTextField salaryField;
-
     private final String[] months = {
         "Ιανουάριος", "Φεβρουάριος", "Μάρτιος", "Απρίλιος", "Μάιος", "Ιούνιος",
         "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"
@@ -29,7 +25,6 @@ public class RenewContractDialog extends JDialog {
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10,10));
 
-        // Parse παλιά ημερομηνία (αν είναι "---", παίρνουμε τη σημερινή)
         try {
             if (oldEndStr == null || oldEndStr.equals("---")) {
                 this.oldEndDate = LocalDate.now();
@@ -49,28 +44,24 @@ public class RenewContractDialog extends JDialog {
         JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
-        // Προεπιλογή: Η νέα σύμβαση ξεκινάει τον επόμενο μήνα
         LocalDate defaultStart = oldEndDate.plusDays(1);
         int currentYear = LocalDate.now().getYear();
 
         startMonthBox = new JComboBox<>(months);
         startYearSpinner = new JSpinner(new SpinnerNumberModel(currentYear, 2020, 2050, 1));
         
-        // Σετάρουμε τις τιμές βάσει της επόμενης μέρας
         startMonthBox.setSelectedIndex(defaultStart.getMonthValue() - 1);
         startYearSpinner.setValue(defaultStart.getYear());
 
         endMonthBox = new JComboBox<>(months);
         endYearSpinner = new JSpinner(new SpinnerNumberModel(currentYear, 2020, 2050, 1));
         
-        // Προεπιλογή λήξης: 6 μήνες μετά
         LocalDate defaultEnd = defaultStart.plusMonths(6);
         endMonthBox.setSelectedIndex(defaultEnd.getMonthValue() - 1);
         endYearSpinner.setValue(defaultEnd.getYear());
 
         salaryField = new JTextField("1000.0");
 
-        // Panels
         JPanel startP = new JPanel(new GridLayout(1,2,5,0));
         startP.add(startMonthBox);
         startP.add(startYearSpinner);
@@ -108,7 +99,6 @@ public class RenewContractDialog extends JDialog {
         LocalDate newStart = getSelectedStartDate();
         LocalDate newEnd = getSelectedEndDate();
 
-        // 1. Έλεγχος: Η νέα έναρξη πρέπει να είναι ΜΕΤΑ την παλιά λήξη
         if (!newStart.isAfter(oldEndDate)) {
             JOptionPane.showMessageDialog(this, 
                 "Η νέα σύμβαση πρέπει να ξεκινάει μετά τη λήξη της παλιάς (" + oldEndDate + ")",
@@ -116,7 +106,6 @@ public class RenewContractDialog extends JDialog {
             return;
         }
 
-        // 2. Έλεγχος: Η λήξη πρέπει να είναι μετά την έναρξη
         if (newEnd.isBefore(newStart)) {
             JOptionPane.showMessageDialog(this, "Η ημερομηνία λήξης είναι πριν την έναρξη!", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
             return;
