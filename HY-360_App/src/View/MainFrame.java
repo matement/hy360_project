@@ -1,5 +1,6 @@
 package View;
 
+import Controller.controller; 
 import javax.swing.*;
 import java.awt.*;
 
@@ -7,8 +8,12 @@ public class MainFrame extends JFrame {
 
     private CardLayout cardLayout;
     private JPanel contentPanel;
+    private controller controller; 
 
     public MainFrame() {
+       
+        controller = new controller(); 
+
         setTitle("HY-360 Μισθοδοσία Πανεπιστημίου Κρήτης");
         setSize(1100, 650);
         setLocationRelativeTo(null);
@@ -16,11 +21,11 @@ public class MainFrame extends JFrame {
 
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
-        
-        contentPanel.add(new EmployeePanel(), "EMPLOYEES");
-        contentPanel.add(new ContractPanel(), "CONTRACTS");
-        contentPanel.add(new PayrollPanel(), "PAYROLL");
-        contentPanel.add(new ReportsPanel(), "REPORTS");
+       
+        contentPanel.add(new EmployeePanel(controller), "EMPLOYEES");
+        contentPanel.add(new ContractPanel(controller), "CONTRACTS");
+        contentPanel.add(new PayrollPanel(controller), "PAYROLL");
+        contentPanel.add(new ReportsPanel(controller), "REPORTS"); 
 
         add(createMenu(), BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);

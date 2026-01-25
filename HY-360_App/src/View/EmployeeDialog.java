@@ -51,7 +51,7 @@ public class EmployeeDialog extends JDialog {
         childrenNamesField = new JTextField();
         childrenAgesField = new JTextField();
 
-        categoryBox = new JComboBox<>(new String[] { "Διοικητικός", "Διδακτικός" });
+        categoryBox = new JComboBox<>(new String[] { "ADMINISTRATIVE", "TEACHING" });
 
         departmentField = new JTextField();
         startDateField = new JTextField("YYYY-MM-DD");

@@ -1,8 +1,10 @@
 package View;
 
+import Controller.controller; 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.Map;
 
 public class ReportsPanel extends JPanel {
 
@@ -12,8 +14,13 @@ public class ReportsPanel extends JPanel {
     private JTextField paramField;
     private JLabel paramLabel;
     private JTextArea sqlArea;
+    
+    private controller controller;
 
-    public ReportsPanel() {
+
+    public ReportsPanel(controller controller) {
+        this.controller = controller; 
+
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -55,7 +62,7 @@ public class ReportsPanel extends JPanel {
         paramPanel.add(paramField);
 
         JButton runBtn = new JButton("Εκτέλεση Αναφοράς");
- 
+
         reportSelector.addActionListener(e -> {
             int idx = reportSelector.getSelectedIndex();
             if (idx == 3) { 
@@ -91,9 +98,6 @@ public class ReportsPanel extends JPanel {
         tableModel.setRowCount(0);
         tableModel.setColumnCount(0);
 
-        // JDBC Queries. 
-        // Για το Demo, ψεύτικα δεδομένα για κάθε περίπτωση.
-
         switch (selectedIndex) {
             case 0: 
                 setColumns("Κατηγορία", "Σύνολο Υπαλλήλων", "Πληρωμένοι", "Εκκρεμείς");
@@ -103,6 +107,7 @@ public class ReportsPanel extends JPanel {
                 break;
 
             case 1: 
+
                 setColumns("Κατηγορία", "Μέγιστος (€)", "Ελάχιστος (€)", "Μέσος (€)");
                 tableModel.addRow(new Object[]{"Διοικητικοί", "1.800", "900", "1.250"});
                 tableModel.addRow(new Object[]{"Διδακτικοί", "2.500", "1.300", "1.900"});
@@ -121,7 +126,6 @@ public class ReportsPanel extends JPanel {
                     return;
                 }
                 setColumns("Ημερομηνία", "Όνομα", "Τύπος Πληρωμής", "Ποσό");
-                
                 tableModel.addRow(new Object[]{"2025-01-31", param, "Μισθοδοσία", "1.200€"});
                 tableModel.addRow(new Object[]{"2024-12-31", param, "Μισθοδοσία", "1.200€"});
                 tableModel.addRow(new Object[]{"2024-12-20", param, "Δώρο Χριστ.", "600€"});
@@ -158,7 +162,7 @@ public class ReportsPanel extends JPanel {
         String query = sqlArea.getText().trim();
         if (query.isEmpty()) return;
 
-        // MOCK RESPONSE ΓΙΑ ΤΟ GUI DEMO
+        // MOCK RESPONSE
         if (query.toLowerCase().startsWith("select")) {
             tableModel.setRowCount(0);
             tableModel.setColumnCount(0);

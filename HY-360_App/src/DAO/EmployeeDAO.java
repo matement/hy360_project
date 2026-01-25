@@ -106,4 +106,26 @@ public class EmployeeDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return amount;
     }
+
+    // Μέθοδος που φέρνει λίστα με πίνακες [Όνομα, Ηλικία] για τα παιδιά ενός υπαλλήλου
+    public java.util.List<String[]> getChildren(int employeeId) {
+        java.util.List<String[]> children = new java.util.ArrayList<>();
+        String sql = "SELECT name, age FROM Child WHERE Employee_idEmployee = ?";
+
+        try (java.sql.Connection conn = JDBC.DBConnection.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, employeeId);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    String age = String.valueOf(rs.getInt("age"));
+                    children.add(new String[]{name, age});
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return children;
+    }
 }
