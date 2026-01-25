@@ -45,7 +45,24 @@ public class DatabaseHelper {
 
             // 3. Departments
             String sqlDept = "INSERT INTO Department (department_name) VALUES (?)";
-            String[] depts = {"Computer Science", "Mathematics", "Physics", "Chemistry"};
+            String[] depts = {
+                    "Mathematics and Applied Mathematics",
+                    "Physics",
+                    "Computer Science",
+                    "Biology",
+                    "Chemistry",
+                    "Materials Science and Technology",
+                    "Medicine",
+                    "Philology",
+                    "History and Archaeology",
+                    "Philosophy",
+                    "Primary Education",
+                    "Preschool Education",
+                    "Sociology",
+                    "Economics",
+                    "Political Science",
+                    "Psychology"
+            };
             try (PreparedStatement ps = conn.prepareStatement(sqlDept)) {
                 for (String d : depts) {
                     ps.setString(1, d);
