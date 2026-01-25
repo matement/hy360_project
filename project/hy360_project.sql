@@ -171,14 +171,13 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `Allowences` ;
 
 CREATE TABLE IF NOT EXISTS `Allowences` (
+  `typeID` INT NOT NULL,
   `research_allowence` DECIMAL(10,2) NULL,
   `library_allowence` DECIMAL(10,2) NULL,
-  `Employee_idEmployee` INT NOT NULL,
-  INDEX `fk_Allowences_Employee1_idx` (`Employee_idEmployee` ASC) VISIBLE,
-  PRIMARY KEY (`Employee_idEmployee`),
-  CONSTRAINT `fk_Allowences_Employee1`
-    FOREIGN KEY (`Employee_idEmployee`)
-    REFERENCES `Employee` (`idEmployee`)
+  PRIMARY KEY (`typeID`),
+  CONSTRAINT `fk_Allowences_Employment_type1`
+    FOREIGN KEY (`typeID`)
+    REFERENCES `Employment_type` (`typeID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
