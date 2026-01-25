@@ -1,6 +1,8 @@
 package View;
 
-import Controller.controller; 
+import Controller.controller;
+import JDBC.DatabaseHelper;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -12,7 +14,13 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
        
-        controller = new controller(); 
+        controller = new controller();
+
+        // ΕΛΕΓΧΟΣ: Αν η βάση είναι άδεια, τρέξε το Setup
+        if (!DatabaseHelper.isDatabaseInitialized()) {
+            System.out.println("Database is empty. Running initial setup...");
+            controller.initializeDatabase();
+        }
 
         setTitle("HY-360 Μισθοδοσία Πανεπιστημίου Κρήτης");
         setSize(1100, 650);

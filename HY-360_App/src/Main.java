@@ -42,7 +42,7 @@ public class Main {
         // Β. Μόνιμος Διοικητικός (ID: 102)
         manager.hirePermanentAdministrative(
                 102, "Μαρία Οικονόμου", "Εθνικής Αντιστάσεως 10", "GR102", "6981234567",
-                false, "Alpha Bank", "Mathematics", startDate, 2
+                false, "Alpha Bank", "Mathematics and Applied Mathematics", startDate, 2
         );
 
         // Γ. Συμβασιούχος Καθηγητής (ID: 103)

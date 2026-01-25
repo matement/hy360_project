@@ -111,4 +111,23 @@ public class DatabaseHelper {
             return new DefaultTableModel(data, columnNames);
         }
     }
+
+    // Ελέγχει αν ο πίνακας Role έχει δεδομένα.
+    // Αν επιστρέψει false, σημαίνει ότι η βάση είναι άδεια και θέλει setup.
+    public static boolean isDatabaseInitialized() {
+        String sql = "SELECT COUNT(*) FROM Role";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                // Αν το count > 0, σημαίνει ότι υπάρχουν ρόλοι, άρα η βάση έχει αρχικοποιηθεί
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            // Αν πετάξει λάθος (π.χ. δεν υπάρχει ο πίνακας), θεωρούμε ότι δεν είναι initialized
+            return false;
+        }
+        return false;
+    }
 }
