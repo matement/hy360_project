@@ -15,6 +15,7 @@ public class SalaryService {
         EmployeeDAO employeeDAO = new EmployeeDAO();
         ContractDAO contractDAO = new ContractDAO();
         SalaryRateDAO salaryRateDAO = new SalaryRateDAO();
+        DAO.AllowanceDAO allowanceDAO = new DAO.AllowanceDAO();
 
         Employee emp = employeeDAO.getEmployeeById(employeeId);
 
@@ -77,9 +78,9 @@ public class SalaryService {
             // Ειδικά Επιδόματα
             if ("TEACHING".equals(role)) {
                 if ("PERMANENT".equals(type)) {
-                    finalSalary += employeeDAO.getResearchAllowance(employeeId);
+                    finalSalary += allowanceDAO.getResearchAllowance();
                 } else if ("CONTRACTOR".equals(type)) {
-                    finalSalary += employeeDAO.getLibraryAllowance(employeeId);
+                    finalSalary += allowanceDAO.getLibraryAllowance();
                 }
             }
 

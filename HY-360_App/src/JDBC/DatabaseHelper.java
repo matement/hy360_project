@@ -78,7 +78,22 @@ public class DatabaseHelper {
                 ps.executeUpdate();
             }
 
-            System.out.println("[System]: Database setup completed (3NF Ready).");
+            String sqlAllow = "INSERT INTO Allowences (typeID, research_allowence, library_allowence) VALUES (?, ?, ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sqlAllow)) {
+                // ID 1: PERMANENT (Έχει Research, Όχι Library)
+                ps.setInt(1, 1);
+                ps.setDouble(2, 300.00); // Default Research Allowance
+                ps.setDouble(3, 0.00);
+                ps.executeUpdate();
+
+                // ID 2: CONTRACTOR (Έχει Library, Όχι Research)
+                ps.setInt(1, 2);
+                ps.setDouble(2, 0.00);
+                ps.setDouble(3, 100.00); // Default Library Allowance
+                ps.executeUpdate();
+            }
+
+            System.out.println("[System]: Database setup completed (3NF Ready + Global Allowances).");
         } catch (Exception e) { e.printStackTrace(); }
     }
 
