@@ -223,21 +223,88 @@ public class EmployeeManager {
         }
     }
 
-    // --- 1. Ενημέρωση Επιδόματος Έρευνας (Για Μόνιμους Διδακτικούς) ---
-    public void updateResearchAllowance(int empId, double newAmount) {
-        String sql = "UPDATE Allowences SET research_allowence = ? WHERE Employee_idEmployee = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    // --- 1. Μαζική Ενημέρωση Επιδόματος Έρευνας (Για ΟΛΟΥΣ τους Μόνιμους Διδακτικούς) ---
+    public void updateGlobalResearchAllowance(double newAmount) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
 
-            ps.setDouble(1, newAmount);
-            ps.setInt(2, empId);
+            // Βήμα 1: Έλεγχος τρέχοντος ποσού (παίρνουμε το μέγιστο που υπάρχει για να συγκρίνουμε)
+            // Χρησιμοποιούμε MAX για να βρούμε τι ισχύει (αφού υποτίθεται είναι ίδιο για όλους)
+            String checkSql = "SELECT MAX(research_allowence) FROM Allowences";
+            double currentAmount = 0.0;
 
-            int rows = ps.executeUpdate();
-            if (rows > 0) {
-                System.out.println("Success: Research allowance for Employee " + empId + " updated to " + newAmount + "€");
-            } else {
-                System.out.println("Error: Employee " + empId + " not found in Allowences table.");
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(checkSql)) {
+                if (rs.next()) {
+                    currentAmount = rs.getDouble(1);
+                }
             }
+
+            // Βήμα 2: Έλεγχος Απαγόρευσης Μείωσης
+            if (newAmount < currentAmount) {
+                System.out.println("ΣΦΑΛΜΑ: Η μείωση του επιδόματος απαγορεύεται από τον κανονισμό (Τρέχον: " + currentAmount + "€).");
+                return;
+            }
+
+            // Βήμα 3: Μαζική ενημέρωση για όλους τους Μόνιμους Διδακτικούς
+            // Βρίσκουμε τα IDs των PERMANENT TEACHING και κάνουμε update
+            String updateSql = "UPDATE Allowences " +
+                    "SET research_allowence = ? " +
+                    "WHERE Employee_idEmployee IN (" +
+                    "    SELECT idEmployee FROM Employee e " +
+                    "    JOIN Role r ON e.Role_roleID = r.roleID " +
+                    "    JOIN Employment_type et ON e.Employment_type_typeID = et.typeID " +
+                    "    WHERE r.role_name = 'TEACHING' AND et.type_name = 'PERMANENT'" +
+                    ")";
+
+            try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                ps.setDouble(1, newAmount);
+                int rows = ps.executeUpdate();
+                System.out.println("Επιτυχία: Το επίδομα έρευνας ενημερώθηκε σε " + newAmount + "€ για " + rows + " υπαλλήλους.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // --- 2. Μαζική Ενημέρωση Επιδόματος Βιβλιοθήκης (Για ΟΛΟΥΣ τους Συμβασιούχους Διδακτικούς) ---
+    public void updateGlobalLibraryAllowance(double newAmount) {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+
+            // Βήμα 1: Έλεγχος τρέχοντος ποσού
+            String checkSql = "SELECT MAX(library_allowence) FROM Allowences";
+            double currentAmount = 0.0;
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(checkSql)) {
+                if (rs.next()) currentAmount = rs.getDouble(1);
+            }
+
+            // Βήμα 2: Έλεγχος Απαγόρευσης Μείωσης
+            if (newAmount < currentAmount) {
+                System.out.println("ΣΦΑΛΜΑ: Η μείωση του επιδόματος απαγορεύεται (Τρέχον: " + currentAmount + "€).");
+                return;
+            }
+
+            // Βήμα 3: Μαζική ενημέρωση για όλους τους Συμβασιούχους Διδακτικούς
+            String updateSql = "UPDATE Allowences " +
+                    "SET library_allowence = ? " +
+                    "WHERE Employee_idEmployee IN (" +
+                    "    SELECT idEmployee FROM Employee e " +
+                    "    JOIN Role r ON e.Role_roleID = r.roleID " +
+                    "    JOIN Employment_type et ON e.Employment_type_typeID = et.typeID " +
+                    "    WHERE r.role_name = 'TEACHING' AND et.type_name = 'CONTRACTOR'" +
+                    ")";
+
+            try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
+                ps.setDouble(1, newAmount);
+                int rows = ps.executeUpdate();
+                System.out.println("Επιτυχία: Το επίδομα βιβλιοθήκης ενημερώθηκε σε " + newAmount + "€ για " + rows + " υπαλλήλους.");
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -280,23 +347,4 @@ public class EmployeeManager {
         System.out.println("Payroll finished.");
     }
 
-    // --- 2. Ενημέρωση Επιδόματος Βιβλιοθήκης (Για Συμβασιούχους Διδακτικούς) ---
-    public void updateLibraryAllowance(int empId, double newAmount) {
-        String sql = "UPDATE Allowences SET library_allowence = ? WHERE Employee_idEmployee = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setDouble(1, newAmount);
-            ps.setInt(2, empId);
-
-            int rows = ps.executeUpdate();
-            if (rows > 0) {
-                System.out.println("Success: Library allowance for Employee " + empId + " updated to " + newAmount + "€");
-            } else {
-                System.out.println("Error: Employee " + empId + " not found in Allowences table.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }
