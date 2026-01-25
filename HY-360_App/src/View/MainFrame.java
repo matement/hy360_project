@@ -26,7 +26,6 @@ public class MainFrame extends JFrame {
         contentPanel.add(new ContractPanel(controller), "CONTRACTS");
         contentPanel.add(new PayrollPanel(controller), "PAYROLL");
         contentPanel.add(new ReportsPanel(controller), "REPORTS"); 
-        contentPanel.add(new SearchPanel(), "SEARCH");
 
         add(createMenu(), BorderLayout.NORTH);
         add(contentPanel, BorderLayout.CENTER);
@@ -47,14 +46,11 @@ public class MainFrame extends JFrame {
         JButton repBtn = new JButton("Αναφορές");
         repBtn.addActionListener(e -> cardLayout.show(contentPanel, "REPORTS"));
 
-        JButton searchBtn = new JButton("Αναζήτηση");
-        searchBtn.addActionListener(e -> cardLayout.show(contentPanel, "SEARCH"));
 
         bar.add(empBtn);
         bar.add(conBtn);
         bar.add(payBtn);
         bar.add(repBtn);
-        bar.add(searchBtn);
 
         return bar;
     }

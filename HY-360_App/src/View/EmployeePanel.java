@@ -28,13 +28,24 @@ public class EmployeePanel extends JPanel {
     private void refreshTable() {
         model.setRowCount(0); 
         List<Object[]> rows = controller.getAllEmployees(); 
+        
         for (Object[] row : rows) {
+            
+            // --- ΦΙΛΤΡΟ: ΕΜΦΑΝΙΣΗ ΜΟΝΟ PERMANENT ---
+            String category = (String) row[6]; 
+            
+            if (category == null || 
+               (!category.contains("PERMANENT") && !category.contains("Μόνιμος"))) {
+                continue; 
+            }
+            // ----------------------------------------
+
             model.addRow(row);
         }
     }
 
     private JLabel createTitle() {
-        JLabel label = new JLabel("Διαχείριση Υπαλλήλων", SwingConstants.CENTER);
+        JLabel label = new JLabel("Διαχείριση Υπαλλήλων (Μόνιμο Προσωπικό)", SwingConstants.CENTER);
         label.setFont(label.getFont().deriveFont(Font.BOLD, 22f));
         return label;
     }
@@ -53,13 +64,11 @@ public class EmployeePanel extends JPanel {
             }
         };
 
-        
-
         table = new JTable(model);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); 
-        table.getColumnModel().getColumn(1).setPreferredWidth(150); // Όνομα
-        table.getColumnModel().getColumn(4).setPreferredWidth(150); // Ονόματα παιδιών
-        table.getColumnModel().getColumn(12).setPreferredWidth(150); // IBAN
+        table.getColumnModel().getColumn(1).setPreferredWidth(150); 
+        table.getColumnModel().getColumn(4).setPreferredWidth(150); 
+        table.getColumnModel().getColumn(12).setPreferredWidth(150); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         return new JScrollPane(table);
@@ -100,6 +109,8 @@ public class EmployeePanel extends JPanel {
             String selectedRole = dialog.getCategory(); 
             String fullCategory = "PERMANENT " + selectedRole;
 
+            // --- ΣΗΜΕΙΟ ΔΙΟΡΘΩΣΗΣ ---
+            // Προστέθηκε η 13η παράμετρος (null) στο τέλος
             boolean success = controller.addEmployee(
                     dialog.getNameValue(),
                     dialog.getMaritalStatus(),
@@ -112,7 +123,8 @@ public class EmployeePanel extends JPanel {
                     dialog.getAddress(),
                     dialog.getPhone(),
                     dialog.getBankName(),
-                    dialog.getIban()
+                    dialog.getIban(),
+                    null // <--- ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ (null για μόνιμους)
             );
 
             if (success) {
@@ -146,7 +158,12 @@ public class EmployeePanel extends JPanel {
                 (String) model.getValueAt(row, 12)
         );
 
+        // --- Η ΑΛΛΑΓΗ ΕΙΝΑΙ ΕΔΩ ---
+        dialog.disableFixedFields(); // <--- Κλειδώνει Ημερομηνία, Τμήμα, Κατηγορία
+        // -------------------------
+
         dialog.setVisible(true);
+        
         if (dialog.isConfirmed()) {
             boolean success = controller.updateEmployee(
                 id,
@@ -155,9 +172,9 @@ public class EmployeePanel extends JPanel {
                 dialog.getNumChildren(),
                 dialog.getChildrenNames(),
                 dialog.getChildrenAges(),
-                dialog.getCategory(),
-                dialog.getDepartment(),
-                dialog.getStartDate(),
+                dialog.getCategory(),   // Στέλνει την παλιά (κλειδωμένη) τιμή
+                dialog.getDepartment(), // Στέλνει την παλιά (κλειδωμένη) τιμή
+                dialog.getStartDate(),  // Στέλνει την παλιά (κλειδωμένη) τιμή
                 dialog.getAddress(),
                 dialog.getPhone(),
                 dialog.getBankName(),
@@ -203,12 +220,6 @@ public class EmployeePanel extends JPanel {
         if (!isRowSelected()) return;
         int row = table.getSelectedRow();
         int id = (int) model.getValueAt(row, 0);
-
-        /*
-        java.time.LocalDate today = java.time.LocalDate.now();
-        java.time.LocalDate lastDayOfMonth = today.withDayOfMonth(today.lengthOfMonth());
-        if (!today.equals(lastDayOfMonth)) { ... }
-        */
 
         int confirm = JOptionPane.showConfirmDialog(
                 this,

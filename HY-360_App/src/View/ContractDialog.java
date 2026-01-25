@@ -3,6 +3,7 @@ package View;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 public class ContractDialog extends JDialog {
 
@@ -18,8 +19,14 @@ public class ContractDialog extends JDialog {
     private JComboBox<String> categoryBox;
 
     private JTextField departmentField;
-    private JTextField startDateField;
-    private JTextField endDateField;
+    
+    // --- ΝΕΑ ΠΕΔΙΑ ΓΙΑ ΗΜΕΡΟΜΗΝΙΕΣ ---
+    private JComboBox<String> startMonthBox;
+    private JSpinner startYearSpinner;
+    
+    private JComboBox<String> endMonthBox;
+    private JSpinner endYearSpinner;
+    // ---------------------------------
 
     private JTextField addressField;
     private JTextField phoneField;
@@ -27,9 +34,14 @@ public class ContractDialog extends JDialog {
     private JTextField bankField;
     private JTextField ibanField;
 
+    private final String[] months = {
+        "Ιανουάριος", "Φεβρουάριος", "Μάρτιος", "Απρίλιος", "Μάιος", "Ιούνιος",
+        "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"
+    };
+
     public ContractDialog(JFrame parent, String title, boolean readOnly) {
         super(parent, title, true);
-        setSize(500, 680); 
+        setSize(550, 720); // Λίγο πιο φαρδύ για να χωρέσουν οι ημερομηνίες
         setLocationRelativeTo(parent);
         setLayout(new BorderLayout(10,10));
 
@@ -38,7 +50,6 @@ public class ContractDialog extends JDialog {
 
         if (readOnly) makeFieldsRead();
     }
-
   
     private JPanel createForm() {
         JPanel panel = new JPanel(new GridLayout(0,2,10,10));
@@ -54,8 +65,25 @@ public class ContractDialog extends JDialog {
         categoryBox = new JComboBox<>(new String[] {"ADMINISTRATIVE", "TEACHING"});
 
         departmentField = new JTextField();
-        startDateField = new JTextField("YYYY-MM-DD");
-        endDateField = new JTextField("YYYY-MM-DD");
+
+        // --- SETUP ΗΜΕΡΟΜΗΝΙΩΝ ---
+        int currentYear = LocalDate.now().getYear();
+        
+        startMonthBox = new JComboBox<>(months);
+        startYearSpinner = new JSpinner(new SpinnerNumberModel(currentYear, 2020, 2050, 1));
+        
+        endMonthBox = new JComboBox<>(months);
+        endYearSpinner = new JSpinner(new SpinnerNumberModel(currentYear, 2020, 2050, 1));
+        
+        // Βοηθητικά Panels για να μπουν Μήνας και Έτος στην ίδια γραμμή
+        JPanel startDatePanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        startDatePanel.add(startMonthBox);
+        startDatePanel.add(startYearSpinner);
+
+        JPanel endDatePanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        endDatePanel.add(endMonthBox);
+        endDatePanel.add(endYearSpinner);
+        // -------------------------
 
         addressField = new JTextField();
         phoneField = new JTextField();
@@ -84,11 +112,11 @@ public class ContractDialog extends JDialog {
         panel.add(new JLabel("Τμήμα:")); 
         panel.add(departmentField);
         
-        panel.add(new JLabel("Ημ. Έναρξης (YYYY-MM-DD):")); 
-        panel.add(startDateField);
+        panel.add(new JLabel("Έναρξη (Μήνας/Έτος):")); 
+        panel.add(startDatePanel); // Προσθήκη του σύνθετου panel
         
-        panel.add(new JLabel("Ημ. Λήξης (YYYY-MM-DD):")); 
-        panel.add(endDateField);
+        panel.add(new JLabel("Λήξη (Μήνας/Έτος):")); 
+        panel.add(endDatePanel);   // Προσθήκη του σύνθετου panel
 
         panel.add(new JLabel("Διεύθυνση:")); 
         panel.add(addressField);
@@ -103,6 +131,20 @@ public class ContractDialog extends JDialog {
         panel.add(ibanField);
 
         return panel;
+    }
+
+    public void disableFixedFields() {
+        // 1. Κλείδωμα Ημερομηνιών
+        startMonthBox.setEnabled(false);
+        startYearSpinner.setEnabled(false);
+        endMonthBox.setEnabled(false);
+        endYearSpinner.setEnabled(false);
+
+        // 2. Κλείδωμα Τμήματος (JTextField -> setEditable false)
+        departmentField.setEditable(false);
+
+        // 3. Κλείδωμα Κατηγορίας (JComboBox -> setEnabled false)
+        categoryBox.setEnabled(false);
     }
 
     private JPanel createButtons() {
@@ -132,23 +174,33 @@ public class ContractDialog extends JDialog {
 
     private boolean validateDates() {
         try {
-            LocalDate start = LocalDate.parse(startDateField.getText());
-            LocalDate end = LocalDate.parse(endDateField.getText());
+            LocalDate start = getLocalDateStart();
+            LocalDate end = getLocalDateEnd();
             
-            if (start.getDayOfMonth() != 1) {
-                error("Η σύμβαση πρέπει να ξεκινάει την 1η του μήνα");
-                return false;
-            }
-
             if (end.isBefore(start)) {
                 error("Η ημερομηνία λήξης δεν μπορεί να είναι πριν την έναρξη");
                 return false;
             }
         } catch (Exception e) {
-            error("Λάθος μορφή ημερομηνίας (YYYY-MM-DD)");
+            error("Λάθος στις ημερομηνίες");
             return false;
         }
         return true;
+    }
+
+    // Βοηθητική μέθοδος για να φτιάχνει το αντικείμενο LocalDate Έναρξης
+    private LocalDate getLocalDateStart() {
+        int month = startMonthBox.getSelectedIndex() + 1;
+        int year = (int) startYearSpinner.getValue();
+        return LocalDate.of(year, month, 1); // Πάντα 1η του μήνα
+    }
+
+    // Βοηθητική μέθοδος για να φτιάχνει το αντικείμενο LocalDate Λήξης
+    private LocalDate getLocalDateEnd() {
+        int month = endMonthBox.getSelectedIndex() + 1;
+        int year = (int) endYearSpinner.getValue();
+        // Βρίσκουμε την τελευταία μέρα του μήνα
+        return YearMonth.of(year, month).atEndOfMonth();
     }
 
     private void error(String msg) {
@@ -165,8 +217,13 @@ public class ContractDialog extends JDialog {
         
         categoryBox.setEnabled(false);
         departmentField.setEditable(false);
-        startDateField.setEditable(false);
-        endDateField.setEditable(false);
+        
+        // Disable date components
+        startMonthBox.setEnabled(false);
+        startYearSpinner.setEnabled(false);
+        endMonthBox.setEnabled(false);
+        endYearSpinner.setEnabled(false);
+        
         addressField.setEditable(false);
         phoneField.setEditable(false);
         bankField.setEditable(false);
@@ -184,17 +241,26 @@ public class ContractDialog extends JDialog {
 
     public String getCategory() { return (String) categoryBox.getSelectedItem(); }
     public String getDepartment() { return departmentField.getText(); }
-    public String getStart() { return startDateField.getText(); }
-    public String getEnd() { return endDateField.getText(); }
+    
+    // --- ΤΡΟΠΟΠΟΙΗΜΕΝΑ GETTERS ΓΙΑ ΝΑ ΕΠΙΣΤΡΕΦΟΥΝ STRING (YYYY-MM-DD) ---
+    public String getStart() { 
+        return getLocalDateStart().toString(); 
+    }
+    
+    public String getEnd() { 
+        return getLocalDateEnd().toString(); 
+    }
+    // ---------------------------------------------------------------------
+
     public String getAddress() { return addressField.getText(); }
     public String getPhone() { return phoneField.getText(); }
     public String getBank() { return bankField.getText(); }
     public String getIban() { return ibanField.getText(); }
 
-   
+    // --- ΤΡΟΠΟΠΟΙΗΜΕΝΟ SETTER ΓΙΑ ΝΑ "ΣΠΑΕΙ" ΤΙΣ ΗΜΕΡΟΜΗΝΙΕΣ ---
     public void setFields(String name, String marital, int children, 
                           String names, String ages, 
-                          String category, String department, String start, String end, 
+                          String category, String department, String startStr, String endStr, 
                           String address, String phone, String bank, String iban) {
         
         nameField.setText(name);
@@ -206,8 +272,23 @@ public class ContractDialog extends JDialog {
         
         categoryBox.setSelectedItem(category);
         departmentField.setText(department);
-        startDateField.setText(start);
-        endDateField.setText(end);
+        
+        // Parse Start Date String -> UI
+        try {
+            LocalDate startDate = LocalDate.parse(startStr);
+            startMonthBox.setSelectedIndex(startDate.getMonthValue() - 1);
+            startYearSpinner.setValue(startDate.getYear());
+        } catch (Exception e) {}
+
+        // Parse End Date String -> UI
+        try {
+            if (endStr != null && !endStr.equals("---")) {
+                LocalDate endDate = LocalDate.parse(endStr);
+                endMonthBox.setSelectedIndex(endDate.getMonthValue() - 1);
+                endYearSpinner.setValue(endDate.getYear());
+            }
+        } catch (Exception e) {}
+
         addressField.setText(address);
         phoneField.setText(phone);
         bankField.setText(bank);

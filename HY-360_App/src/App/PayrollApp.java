@@ -1,7 +1,6 @@
 package App;
 
 import com.formdev.flatlaf.FlatDarkLaf; // Βιβλιοθήκη για το Look & Feel
-import Controller.controller;
 import View.MainFrame;
 
 import javax.swing.*;
