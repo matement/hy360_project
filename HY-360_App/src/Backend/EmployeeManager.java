@@ -223,15 +223,24 @@ public class EmployeeManager {
         }
     }
 
-    public void updateResearchAllowance(int empId, double newAllowance) {
+    // --- 1. Ενημέρωση Επιδόματος Έρευνας (Για Μόνιμους Διδακτικούς) ---
+    public void updateResearchAllowance(int empId, double newAmount) {
         String sql = "UPDATE Allowences SET research_allowence = ? WHERE Employee_idEmployee = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDouble(1, newAllowance);
+
+            ps.setDouble(1, newAmount);
             ps.setInt(2, empId);
-            ps.executeUpdate();
-            System.out.println("Success: Research allowance updated.");
-        } catch (SQLException e) { e.printStackTrace(); }
+
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                System.out.println("Success: Research allowance for Employee " + empId + " updated to " + newAmount + "€");
+            } else {
+                System.out.println("Error: Employee " + empId + " not found in Allowences table.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void addChild(int employeeId, String childName, int age) {
@@ -269,5 +278,25 @@ public class EmployeeManager {
             salaryService.calculateMonthlySalary(emp.getId());
         }
         System.out.println("Payroll finished.");
+    }
+
+    // --- 2. Ενημέρωση Επιδόματος Βιβλιοθήκης (Για Συμβασιούχους Διδακτικούς) ---
+    public void updateLibraryAllowance(int empId, double newAmount) {
+        String sql = "UPDATE Allowences SET library_allowence = ? WHERE Employee_idEmployee = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDouble(1, newAmount);
+            ps.setInt(2, empId);
+
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                System.out.println("Success: Library allowance for Employee " + empId + " updated to " + newAmount + "€");
+            } else {
+                System.out.println("Error: Employee " + empId + " not found in Allowences table.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
