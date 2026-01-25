@@ -1,23 +1,56 @@
 package View;
 
+import Controller.controller; 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 public class ContractPanel extends JPanel {
 
     private JTable table;
     private DefaultTableModel model;
+    private controller controller; 
 
-    public ContractPanel() {
+    public ContractPanel(controller controller) {
+        this.controller = controller;
+
         setLayout(new BorderLayout(10,10));
         setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
         add(createTitle(), BorderLayout.NORTH);
         add(createTable(), BorderLayout.CENTER);
         add(createButtons(), BorderLayout.SOUTH);
+
+        refreshTable(); 
+    }
+
+    private void refreshTable() {
+        model.setRowCount(0);
+        List<Object[]> rows = controller.getAllEmployees();
+
+        for (Object[] row : rows) {
+            
+            Object[] guiRow = new Object[14];
+            guiRow[0] = row[0]; // ID
+            guiRow[1] = row[1]; // Name
+            guiRow[2] = row[2]; // Marital
+            guiRow[3] = row[3]; // Kids
+            guiRow[4] = row[4]; // Kids Names
+            guiRow[5] = row[5]; // Kids Ages
+            guiRow[6] = row[6]; // Category
+            guiRow[7] = row[7]; // Dept
+            guiRow[8] = row[8]; // Start Date
+            guiRow[9] = "---";  // End Date 
+            guiRow[10] = row[9]; // Address
+            guiRow[11] = row[10]; // Phone
+            guiRow[12] = row[11]; // Bank
+            guiRow[13] = row[12]; // IBAN
+
+            model.addRow(guiRow);
+        }
     }
 
     private JLabel createTitle() {
@@ -52,22 +85,6 @@ public class ContractPanel extends JPanel {
             }
         };
 
-        model.addRow(new Object[]{
-            1,
-            "Αλέξανδρος Βίτσος",
-            "Άγαμος",
-            2,
-            "Νίκος, Ελένη", 
-            "5, 8",
-            "Διοικητικός",
-            "Πληροφορική",
-            "2026-09-01",
-            "2026-10-31",
-            "Ηρ. Πολυτεχνείου 10",
-            "6971234567",
-            "Alpha Bank",
-            "GR16011012500000000123",
-        });
 
         table = new JTable(model);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -108,22 +125,19 @@ public class ContractPanel extends JPanel {
         d.setVisible(true);
 
         if (d.isConfirmed()) {
-            model.addRow(new Object[]{
-                    model.getRowCount()+1,
-                    d.getName(),
-                    d.getMarital(),
-                    d.getChildren(),
-                    d.getChildrenNames(),
-                    d.getAges(),
-                    d.getCategory(),
-                    d.getDepartment(),
-                    d.getStart(),
-                    d.getEnd(),
-                    d.getAddress(),
-                    d.getPhone(),
-                    d.getBank(),
-                    d.getIban()
-            });
+            boolean success = controller.addEmployee(
+                d.getName(), d.getMarital(), d.getChildren(),
+                d.getChildrenNames(), d.getAges(), d.getCategory(),
+                d.getDepartment(), d.getStart(), d.getAddress(),
+                d.getPhone(), d.getBank(), d.getIban()
+            );
+
+            if (success) {
+                refreshTable();
+                JOptionPane.showMessageDialog(this, "Η σύμβαση αποθηκεύτηκε στη βάση!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Σφάλμα αποθήκευσης.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -131,6 +145,7 @@ public class ContractPanel extends JPanel {
         if (!isRowSelected()) return;
 
         int row = table.getSelectedRow();
+        int id = (int) model.getValueAt(row, 0); 
 
         ContractDialog d = new ContractDialog(
                 (JFrame) SwingUtilities.getWindowAncestor(this),
@@ -142,11 +157,11 @@ public class ContractPanel extends JPanel {
                 (String) model.getValueAt(row, 1),  // Name
                 (String) model.getValueAt(row, 2),  // Marital
                 (int) model.getValueAt(row, 3),     // Children
-                (String) model.getValueAt(row, 4),  // NEW: Names
+                (String) model.getValueAt(row, 4),  // Names
                 (String) model.getValueAt(row, 5),  // Ages
                 (String) model.getValueAt(row, 6),  // Category
                 (String) model.getValueAt(row, 7),  // Department
-                (String) model.getValueAt(row, 8),  // Start
+                model.getValueAt(row, 8).toString(), // Start
                 (String) model.getValueAt(row, 9),  // End 
                 (String) model.getValueAt(row, 10), // Address
                 (String) model.getValueAt(row, 11), // Phone
@@ -157,19 +172,17 @@ public class ContractPanel extends JPanel {
         d.setVisible(true);
 
         if (d.isConfirmed()) {
-            model.setValueAt(d.getName(), row, 1);
-            model.setValueAt(d.getMarital(), row, 2);
-            model.setValueAt(d.getChildren(), row, 3);
-            model.setValueAt(d.getChildrenNames(), row, 4);
-            model.setValueAt(d.getAges(), row, 5);
-            model.setValueAt(d.getCategory(), row, 6);
-            model.setValueAt(d.getDepartment(), row, 7);
-            model.setValueAt(d.getStart(), row, 8);
-            model.setValueAt(d.getEnd(), row, 9);
-            model.setValueAt(d.getAddress(), row, 10);
-            model.setValueAt(d.getPhone(), row, 11);
-            model.setValueAt(d.getBank(), row, 12);
-            model.setValueAt(d.getIban(), row, 13);
+            boolean success = controller.updateEmployee(
+                id, d.getName(), d.getMarital(), d.getChildren(),
+                d.getChildrenNames(), d.getAges(), d.getCategory(),
+                d.getDepartment(), d.getStart(), d.getAddress(),
+                d.getPhone(), d.getBank(), d.getIban()
+            );
+            
+            if (success) {
+                refreshTable();
+                JOptionPane.showMessageDialog(this, "Τα στοιχεία ενημερώθηκαν!");
+            }
         }
     }
 
@@ -192,7 +205,7 @@ public class ContractPanel extends JPanel {
                 (String) model.getValueAt(row, 5),
                 (String) model.getValueAt(row, 6),
                 (String) model.getValueAt(row, 7),
-                (String) model.getValueAt(row, 8),
+                model.getValueAt(row, 8).toString(),
                 (String) model.getValueAt(row, 9),
                 (String) model.getValueAt(row, 10),
                 (String) model.getValueAt(row, 11),
@@ -206,9 +219,13 @@ public class ContractPanel extends JPanel {
     private void onRefr() {
         if (!isRowSelected()) return;
         int row = table.getSelectedRow();
+        int id = (int) model.getValueAt(row, 0); 
 
         try {
             String oldEndStr = (String) model.getValueAt(row, 9);
+            if (oldEndStr == null || oldEndStr.equals("---")) {
+                oldEndStr = LocalDate.now().toString(); 
+            }
             LocalDate oldEnd = LocalDate.parse(oldEndStr);
 
             LocalDate newStart = oldEnd.plusDays(1);
@@ -225,28 +242,20 @@ public class ContractPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Η λήξη δεν μπορεί να είναι πριν την έναρξη!", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            
+            String salaryStr = JOptionPane.showInputDialog(this, "Εισάγετε τον μισθό της νέας σύμβασης:");
+            double salary = (salaryStr != null && !salaryStr.isEmpty()) ? Double.parseDouble(salaryStr) : 1000.0;
 
-            model.addRow(new Object[]{
-                model.getRowCount() + 1,        
-                model.getValueAt(row, 1),       
-                model.getValueAt(row, 2),       
-                model.getValueAt(row, 3),       
-                model.getValueAt(row, 4),      
-                model.getValueAt(row, 5),       
-                model.getValueAt(row, 6),       
-                model.getValueAt(row, 7),       
-                newStart.toString(),            
-                newEnd.toString(),              
-                model.getValueAt(row, 10),      
-                model.getValueAt(row, 11),      
-                model.getValueAt(row, 12),      
-                model.getValueAt(row, 13)       
-            });
-
+            controller.renewContract(id, java.sql.Date.valueOf(newStart), java.sql.Date.valueOf(newEnd), salary);
+            
             JOptionPane.showMessageDialog(this, "Η σύμβαση ανανεώθηκε (δημιουργήθηκε νέα εγγραφή).");
+            refreshTable();
 
         } catch (DateTimeParseException e) {
             JOptionPane.showMessageDialog(this, "Λάθος μορφή ημερομηνίας (YYYY-MM-DD)", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Σφάλμα κατά την ανανέωση.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

@@ -1,33 +1,38 @@
 package View;
 
+import Controller.controller; 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
-import java.util.Random; 
+import java.util.Map;
 
 public class PayrollPanel extends JPanel {
 
-
+    private controller controller; 
+    
     private DefaultTableModel settingsModel;
     private DefaultTableModel historyModel;
     private JComboBox<String> monthBox;
     private JSpinner yearSpinner;
 
-    public PayrollPanel() {
+    public PayrollPanel(controller controller) {
+        this.controller = controller;
+
         setLayout(new GridLayout(2, 1, 10, 10)); 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         add(createSettingsPanel());
-
         add(createExecutionPanel());
+
+        loadSettingsFromDB();
     }
 
     private JPanel createSettingsPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createTitledBorder("Α. Ρύθμιση Βασικών Μισθών & Επιδομάτων"));
+        panel.setBorder(BorderFactory.createTitledBorder("Α. Ρύθμιση Βασικών Μισθών (Από Βάση Δεδομένων)"));
 
-        String[] columns = {"Περιγραφή Κατηγορίας", "Τρέχουσα Τιμή (€)"};
+        String[] columns = {"Ρόλος / Κατηγορία", "Βασικός Μισθός (€)"};
         settingsModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -35,24 +40,34 @@ public class PayrollPanel extends JPanel {
             }
         };
 
-        settingsModel.addRow(new Object[]{"Βασικός Μισθός Διοικητικού (Μόνιμος)", 1000.0});
-        settingsModel.addRow(new Object[]{"Βασικός Μισθός Διδακτικού (Μόνιμος)", 1300.0});
-        settingsModel.addRow(new Object[]{"Επίδομα Έρευνας (Διδακτικοί)", 300.0});
-        settingsModel.addRow(new Object[]{"Επίδομα Βιβλιοθήκης (Συμβασιούχοι Διδακτικοί)", 150.0});
-
         JTable settingsTable = new JTable(settingsModel);
         settingsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        JButton updateBtn = new JButton("Μεταβολή Τιμής (Αύξηση Μόνο)");
+        JButton updateBtn = new JButton("Ενημέρωση Επιλεγμένου");
         updateBtn.addActionListener(e -> updateSelectedSetting(settingsTable));
+        JButton refreshBtn = new JButton("Ανανέωση Λίστας");
+        refreshBtn.addActionListener(e -> loadSettingsFromDB());
 
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnPanel.add(updateBtn);
+        btnPanel.add(refreshBtn);
 
         panel.add(new JScrollPane(settingsTable), BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
 
         return panel;
+    }
+
+    private void loadSettingsFromDB() {
+        settingsModel.setRowCount(0);
+        Map<String, Double> rates = controller.getAllSalaryRates();
+        
+        for (Map.Entry<String, Double> entry : rates.entrySet()) {
+            settingsModel.addRow(new Object[]{
+                entry.getKey(),
+                entry.getValue()
+            });
+        }
     }
 
     private void updateSelectedSetting(JTable table) {
@@ -62,11 +77,11 @@ public class PayrollPanel extends JPanel {
             return;
         }
 
-        String description = (String) settingsModel.getValueAt(row, 0);
+        String roleName = (String) settingsModel.getValueAt(row, 0);
         double currentValue = (Double) settingsModel.getValueAt(row, 1);
 
         String input = JOptionPane.showInputDialog(this, 
-                "Εισάγετε νέα τιμή για:\n" + description + "\n(Τρέχουσα: " + currentValue + "€)", 
+                "Εισάγετε νέο Βασικό Μισθό για: " + roleName + "\n(Τρέχουσα: " + currentValue + "€)", 
                 currentValue);
 
         if (input != null && !input.isEmpty()) {
@@ -75,13 +90,14 @@ public class PayrollPanel extends JPanel {
 
                 if (newValue < currentValue) {
                     JOptionPane.showMessageDialog(this, 
-                        "Σφάλμα: Δεν επιτρέπεται η μείωση μισθών ή επιδομάτων!\n" +
-                        "Νέα τιμή: " + newValue + " < Παλιά τιμή: " + currentValue,
-                        "Απαγορευμένη Ενέργεια", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    settingsModel.setValueAt(newValue, row, 1);
-                    JOptionPane.showMessageDialog(this, "Η τιμή ενημερώθηκε επιτυχώς.");
+                        "Προσοχή: Επιχειρείτε μείωση μισθού.\nΗ αλλαγή θα προχωρήσει, αλλά βεβαιωθείτε ότι είναι νόμιμη.",
+                        "Προειδοποίηση", JOptionPane.WARNING_MESSAGE);
                 }
+
+                controller.updateBaseSalary(roleName, newValue);
+                
+                loadSettingsFromDB();
+                JOptionPane.showMessageDialog(this, "Η τιμή ενημερώθηκε στη βάση δεδομένων.");
 
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Παρακαλώ εισάγετε έγκυρο αριθμό.", "Σφάλμα", JOptionPane.ERROR_MESSAGE);
@@ -91,20 +107,22 @@ public class PayrollPanel extends JPanel {
 
     private JPanel createExecutionPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createTitledBorder("Β. Εκτέλεση & Ιστορικό Μισθοδοσίας"));
+        panel.setBorder(BorderFactory.createTitledBorder("Β. Εκτέλεση Μισθοδοσίας"));
 
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
         
         monthBox = new JComboBox<>(new String[]{
-            "Ιανουάριος", "Φεβρουάριος", "Μάρτιος", "Απρίλιος", "Μάιος", "Ιούνιος",
-            "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"
+            "1 - Ιανουάριος", "2 - Φεβρουάριος", "3 - Μάρτιος", "4 - Απρίλιος", 
+            "5 - Μάιος", "6 - Ιούνιος", "7 - Ιούλιος", "8 - Αύγουστος", 
+            "9 - Σεπτέμβριος", "10 - Οκτώβριος", "11 - Νοέμβριος", "12 - Δεκέμβριος"
         });
         
         int currentYear = LocalDate.now().getYear();
         yearSpinner = new JSpinner(new SpinnerNumberModel(currentYear, 2020, 2050, 1));
         
-        JButton runBtn = new JButton("Υπολογισμός & Πληρωμή");
+        JButton runBtn = new JButton("Εκτέλεση Υπολογισμού");
         runBtn.setFont(runBtn.getFont().deriveFont(Font.BOLD));
+        runBtn.setForeground(new Color(0, 100, 0));
         runBtn.addActionListener(e -> runPayrollLogic());
 
         controls.add(new JLabel("Μήνας:"));
@@ -115,72 +133,37 @@ public class PayrollPanel extends JPanel {
 
         panel.add(controls, BorderLayout.NORTH);
 
-        String[] cols = {"Ημερομηνία", "Ονοματεπώνυμο", "Κατηγορία", "Βασικός", "Επιδόματα", "Κρατήσεις (0)", "Τελικό Ποσό"};
+        String[] cols = {"Μήνυμα Συστήματος"};
         historyModel = new DefaultTableModel(cols, 0);
         JTable historyTable = new JTable(historyModel);
-        
         panel.add(new JScrollPane(historyTable), BorderLayout.CENTER);
 
         return panel;
     }
 
     private void runPayrollLogic() {
-        double baseAdmin = (Double) settingsModel.getValueAt(0, 1);
-        double baseTeach = (Double) settingsModel.getValueAt(1, 1);
-        double researchBonus = (Double) settingsModel.getValueAt(2, 1);
-        double libraryBonus = (Double) settingsModel.getValueAt(3, 1);
+        int monthIndex = monthBox.getSelectedIndex() + 1;
+        int year = (Integer) yearSpinner.getValue();
 
-        // Κανονικά εδώ κάνουμε: SELECT * FROM Employees WHERE Active = 1
-        // Για το Demo, θα δημιουργήσουμε εικονικά δεδομένα βάσει των κανόνων της εκφώνησης:
-        
-        historyModel.setRowCount(0); // Καθαρισμός πίνακα
-        String dateStr = LocalDate.now().toString(); // Ημερομηνία πληρωμής
+        historyModel.setRowCount(0);
+        historyModel.addRow(new Object[]{"Εκκίνηση διαδικασίας..."});
 
-        // --- DEMO 1: Μόνιμος Διοικητικός (10 χρόνια, Έγγαμος, 2 παιδιά) ---
-        // Κανόνας: Βασικός + 15% για κάθε χρόνο μετά τον 1ο + Οικ. Επίδομα
-        int yearsService = 10;
-        double increaseYears = baseAdmin * 0.15 * (yearsService - 1); // 15% για κάθε χρόνο ΜΕΤΑ τον πρώτο
-        double familyBonus = baseAdmin * (0.05 + (0.05 * 2)); // 5% σύζυγος + 5% * 2 παιδιά
-        
-        double totalAdmin = baseAdmin + increaseYears + familyBonus;
-        
-        historyModel.addRow(new Object[]{
-            dateStr, "Γιώργος Παπαδόπουλος", "Μόνιμος Διοικ.", 
-            String.format("%.2f€", baseAdmin), 
-            String.format("%.2f€", increaseYears + familyBonus), 
-            "0€", 
-            String.format("%.2f€", totalAdmin)
-        });
+        new Thread(() -> {
+            try {
+                
+                controller.runPayroll(monthIndex, year);
 
-        // --- DEMO 2: Μόνιμος Διδακτικός (5 χρόνια, Άγαμος) ---
-        // Κανόνας: Βασικός + 15% έτη + Επίδομα Έρευνας
-        yearsService = 5;
-        increaseYears = baseTeach * 0.15 * (yearsService - 1);
-        double totalTeach = baseTeach + increaseYears + researchBonus; // + Research (σταθερό)
-
-        historyModel.addRow(new Object[]{
-            dateStr, "Μαρία Κωνσταντίνου", "Μόνιμος Διδακ.", 
-            String.format("%.2f€", baseTeach), 
-            String.format("%.2f€", increaseYears + researchBonus), 
-            "0€", 
-            String.format("%.2f€", totalTeach)
-        });
-
-        // --- DEMO 3: Συμβασιούχος Διδακτικός ---
-        // Κανόνας: Μισθός Σύμβασης (πχ 800) + Επίδομα Βιβλιοθήκης
-        double contractWage = 800.0;
-        double totalContract = contractWage + libraryBonus;
-
-        historyModel.addRow(new Object[]{
-            dateStr, "Νίκος Αλεξίου", "Συμβ. Διδακ.", 
-            String.format("%.2f€", contractWage), 
-            String.format("%.2f€", libraryBonus), 
-            "0€", 
-            String.format("%.2f€", totalContract)
-        });
-        
-        JOptionPane.showMessageDialog(this, 
-            "Η μισθοδοσία για " + monthBox.getSelectedItem() + " " + yearSpinner.getValue() + 
-            " ολοκληρώθηκε.\nΠραγματοποιήθηκαν καταθέσεις σε 3 εργαζόμενους.");
+                SwingUtilities.invokeLater(() -> {
+                    historyModel.addRow(new Object[]{"Η μισθοδοσία ολοκληρώθηκε επιτυχώς!"});
+                    historyModel.addRow(new Object[]{"Οι πληρωμές καταχωρήθηκαν στον πίνακα Payment."});
+                    JOptionPane.showMessageDialog(this, "Η μισθοδοσία για " + monthIndex + "/" + year + " ολοκληρώθηκε.");
+                });
+            } catch (Exception ex) {
+                SwingUtilities.invokeLater(() -> {
+                    historyModel.addRow(new Object[]{"Σφάλμα: " + ex.getMessage()});
+                    JOptionPane.showMessageDialog(this, "Σφάλμα κατά την εκτέλεση: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                });
+            }
+        }).start();
     }
 }
